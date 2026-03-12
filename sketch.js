@@ -46,7 +46,9 @@ const BOOST_DURATION = 200; // frames
 
 // ── Asset variables ───────────────────────────
 let imgBg;
-let imgPlayer;
+let imgIdle; // pixil-gif-drawing (2).gif — before ENTER
+let imgRun; // pixil-gif-drawing (1).gif — playing/moving
+let imgBoost; // pixil-gif-drawing.gif     — boost mode
 let bgX = 0; // scrolling background x offset
 let raindrops = []; // rain particles (active during shake)
 
@@ -76,7 +78,9 @@ let shakeSuccess = 0; // spikes cleared during shake (need 5 to recover)
 // ── p5 preload ────────────────────────────────
 function preload() {
   imgBg = loadImage("assets/10_17.png");
-  imgPlayer = loadImage("assets/ch.png");
+  imgIdle = loadImage("assets/standing-skin.gif");
+  imgRun = loadImage("assets/running-skin.gif");
+  imgBoost = loadImage("assets/booster-skin.gif");
 }
 
 // ── p5 setup ─────────────────────────────────
@@ -159,7 +163,7 @@ function draw() {
   // ── Start screen ──────────────────────────
   if (state === "start") {
     platformManager.draw();
-    player.draw(false, imgPlayer);
+    player.draw(false, imgIdle);
 
     // ── Title sub-screen ───────────────────
     if (startScreen === "title") {
@@ -298,7 +302,7 @@ function draw() {
     if (shakeActive) translate(random(-4, 4), random(-4, 4));
     platformManager.draw();
     spikeManager.draw(intensity, MAX_INTENSITY);
-    player.draw(boostActive, imgPlayer);
+    player.draw(boostActive, boostActive ? imgBoost : imgRun);
     pop();
 
     hud.draw(
@@ -316,7 +320,7 @@ function draw() {
   if (state === "lose") {
     platformManager.draw();
     spikeManager.draw(intensity, MAX_INTENSITY);
-    player.draw(false, imgPlayer);
+    player.draw(false, imgRun);
     fill(0, 0, 0, 120);
     rect(0, 0, width, height);
 
@@ -391,23 +395,20 @@ function checkCollision() {
       //s.scored = true;
       hitCooldown = 15;
 
-      //if (shakeActive) {
-      // During shake: every hit costs half a heart
-      hearts -= 1;
-      if (hearts <= 0) {
-        state = "lose";
-        return;
+      if (shakeActive) {
+        // During shake: every hit costs 1 heart
+        hearts -= 1;
+        if (hearts <= 0) {
+          state = "lose";
+          return;
+        }
+      } else {
+        // Outside shake: just trigger shake, no heart loss
+        shakeActive = true;
+        shakeSuccess = 0;
+        boostActive = false;
+        boostTimer = 0;
       }
-      //} else {
-      // Outside shake: count misses; 3 triggers shake and cancels boost
-      //misses++;
-      //if (misses >= 3) {
-      shakeActive = true;
-      shakeSuccess = 0;
-      boostActive = false;
-      boostTimer = 0;
-      //}
-      //}
 
       // Reset streak on any hit
       streak = 0;
