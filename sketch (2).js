@@ -17,7 +17,9 @@ let layerOffsets = []; // scrollX per layer
 let imgIdle;
 let imgRun;
 let imgBoost;
+let imgBird;
 let raindrops = [];
+let birds = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -59,14 +61,14 @@ function preload() {
   imgIdle = loadImage("assets/standing-skin.gif");
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
+  imgBird = loadImage("assets/birdfly.png");
 }
 
 // ── p5 setup ─────────────────────────────────
 function setup() {
-  createCanvas(CANVAS_W, CANVAS_H);
+  createCanvas(CANVAS_W, CANVAS_H, "pixelated");
   frameRate(60);
 
-  // levelManager already created in preload
   player = new Player();
   spikeManager = new SpikeManager();
   platformManager = new PlatformManager();
@@ -100,6 +102,7 @@ function resetGame() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
 
   startScreen = "title";
 }
@@ -122,6 +125,7 @@ function startNextLevel() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
 }
 
 // ── Main draw loop ────────────────────────────
@@ -147,7 +151,7 @@ function draw() {
       let x = layerOffsets[i] % imgW;
       if (x > 0) x -= imgW;
       for (let j = 0; j * imgW < width + imgW; j++) {
-        image(img, x + j * imgW, 0, imgW + 2, CANVAS_H);
+        image(img, x + j * imgW - 1, 0, imgW + 2, CANVAS_H);
       }
     }
   }
@@ -408,6 +412,14 @@ function draw() {
     checkScore();
     checkCollision();
 
+    // ── Birds (level 2 only) ──────────────
+    if (levelManager.currentIndex === 1) {
+      if (frameCount % floor(random(180, 300)) === 0) {
+        spawnBird();
+      }
+      updateAndDrawBirds();
+    }
+
     if (levelScore >= lvl.dodgeGoal) {
       state = "levelclear";
       levelClearTimer = 180;
@@ -468,6 +480,45 @@ function advanceLevel() {
   } else {
     state = "win";
   }
+}
+
+// ── Bird spawning ─────────────────────────────
+function spawnBird() {
+  birds.push({
+    x: width + 50,
+    y: random(40, 160),
+    speed: random(2, 4),
+    frame: 0,
+    frameTimer: 0,
+    frameRate: 6,
+  });
+}
+
+// ── Bird update + draw ────────────────────────
+function updateAndDrawBirds() {
+  for (let b of birds) {
+    b.frameTimer++;
+    if (b.frameTimer >= b.frameRate) {
+      b.frame = (b.frame + 1) % 6;
+      b.frameTimer = 0;
+    }
+
+    b.x -= b.speed;
+
+    let sx = b.frame * 32;
+    image(imgBird, b.x, b.y, 32, 32, sx, 0, 32, 32);
+
+    const overlapX = player.x + player.w > b.x + 4 && player.x < b.x + 28;
+    const overlapY = player.y + player.h > b.y + 4 && player.y < b.y + 28;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      hearts = max(0, hearts - 1);
+      hitCooldown = 60;
+      if (hearts <= 0) state = "lose";
+    }
+  }
+
+  birds = birds.filter((b) => b.x > -50);
 }
 
 // ── Rain effect ───────────────────────────────
