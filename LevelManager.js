@@ -1,26 +1,3 @@
-/*
-  LevelManager.js
-  ─────────────────────────────────────────────
-  Manages level definitions and tracks which
-  level the player is currently on.
-
-  Each level object defines:
-    name          — display name shown on the HUD
-    dodgeGoal     — spikes to dodge to finish the level
-    bgTint        — overlay color applied to the background [r,g,b,a]
-    groundColor   — color of the ground line
-    spikeAirChance — probability of air spikes (0.0–1.0)
-    baseSpeed     — starting scroll speed for this level
-    maxSpeedBonus — how much extra speed intensity adds
-    spawnRateMin  — fastest spawn interval (frames) at max intensity
-    spawnRateMax  — slowest spawn interval at zero intensity
-    platformColor — hex string passed to Platform.js draw override
-    message       — short flavour text shown on the level-clear screen
-
-  LevelManager does NOT touch p5 or game objects directly —
-  sketch.js reads the config and applies it each frame.
-*/
-
 class LevelManager {
   constructor() {
     this.levels = [
@@ -28,14 +5,21 @@ class LevelManager {
       {
         name: "Level 1 — Fractured Skylines",
         dodgeGoal: 20,
-        bgTint: null, // no extra tint; default pink city bg
+        bgLayers: [
+          { path: "assets/city 1.png", speed: 0.1 },
+          { path: "assets/city 2.png", speed: 0.25 },
+          { path: "assets/city 3.png", speed: 0.5 },
+          { path: "assets/city 4.png", speed: 0.75 },
+          { path: "assets/city 5.png", speed: 1.0 },
+        ],
+        bgTint: null,
         groundStroke: [40, 40, 40],
         airSpikeChance: 0.35,
         baseSpeed: 4,
         maxSpeedBonus: 1,
         spawnRateMin: 70,
         spawnRateMax: 100,
-        platformColor: [222, 153, 182], // original pink
+        platformColor: [222, 153, 182],
         message: "You survived Fractured Skylines! Heading deeper...",
       },
 
@@ -43,14 +27,21 @@ class LevelManager {
       {
         name: "Level 2 — Sky",
         dodgeGoal: 20,
-        bgTint: [10, 20, 70, 100], // blue storm tint always on
+        bgLayers: [
+          { path: "assets/cloud 1.png", speed: 0.1 },
+          { path: "assets/cloud 2.png", speed: 0.25 },
+          { path: "assets/cloud 3.png", speed: 0.5 },
+          { path: "assets/cloud 4.png", speed: 0.75 },
+          { path: "assets/cloud 5.png", speed: 1.0 },
+        ],
+        bgTint: [10, 20, 70, 100],
         groundStroke: [80, 120, 200],
-        airSpikeChance: 0.5, // more air spikes = trickier
-        baseSpeed: 5, // faster than level 1
+        airSpikeChance: 0.5,
+        baseSpeed: 5,
         maxSpeedBonus: 1.5,
         spawnRateMin: 60,
         spawnRateMax: 90,
-        platformColor: [100, 140, 210], // blue-ish platforms
+        platformColor: [255, 255, 255, 0],
         message: "You cleared Sky! One final challenge awaits...",
       },
 
@@ -58,14 +49,21 @@ class LevelManager {
       {
         name: "Level 3 — Cave",
         dodgeGoal: 20,
-        bgTint: [5, 0, 20, 180], // near-black void tint
+        bgLayers: [
+          { path: "assets/cave 1.png", speed: 0.1 },
+          { path: "assets/cave 2.png", speed: 0.25 },
+          { path: "assets/cave 3.png", speed: 0.5 },
+          { path: "assets/cave 4.png", speed: 0.75 },
+          { path: "assets/cave 5.png", speed: 1.0 },
+        ],
+        bgTint: [5, 0, 20, 180],
         groundStroke: [180, 50, 220],
-        airSpikeChance: 0.6, // mostly air spikes
-        baseSpeed: 6, // fastest
+        airSpikeChance: 0.6,
+        baseSpeed: 6,
         maxSpeedBonus: 2,
         spawnRateMin: 50,
         spawnRateMax: 80,
-        platformColor: [120, 40, 180], // purple platforms
+        platformColor: [120, 40, 180],
         message: "You escaped the Cave. You win!",
       },
     ];
@@ -73,31 +71,26 @@ class LevelManager {
     this.currentIndex = 0;
   }
 
-  // ── Current level config object ──────────────
   get current() {
     return this.levels[this.currentIndex];
   }
 
-  // ── How many levels exist ────────────────────
   get totalLevels() {
     return this.levels.length;
   }
 
-  // ── Is there a next level? ───────────────────
   hasNext() {
     return this.currentIndex < this.levels.length - 1;
   }
 
-  // ── Advance to next level ────────────────────
   advance() {
     if (this.hasNext()) {
       this.currentIndex++;
       return true;
     }
-    return false; // no more levels → game won
+    return false;
   }
 
-  // ── Reset back to level 1 ────────────────────
   reset() {
     this.currentIndex = 0;
   }

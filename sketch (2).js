@@ -1,40 +1,8 @@
-/*
-  sketch.js
-  ─────────────────────────────────────────────
-  A2 Mid-Term Runner — Main Sketch
-  Course: GBDA302
-
-  This file owns:
-    • Global constants (canvas, physics, heights)
-    • Game-state variables (score, intensity, etc.)
-    • setup / draw / keyPressed
-    • Collision detection (Player ↔ Spikes)
-    • Screen-state machine:
-        "start" → "play" → "levelclear" → "play" (next level)
-                                        → "win"  (after level 3)
-                         → "lose"
-
-  Level configuration is read from LevelManager.js.
-  Each level changes speed, spike rates, air-spike
-  chance, tint colour, and platform colour.
-  After dodging 100 spikes the player clears the level.
-
-  To change how things LOOK or MOVE, edit the
-  matching class file instead of this one:
-    Player.js         — player physics & drawing
-    Spike.js          — single spike drawing (ground + air)
-    SpikeManager.js   — spawn rates, air spike chance
-    Platform.js       — single platform drawing
-    PlatformManager.js — spawn gaps, platform width
-    HUD.js            — all on-screen UI text & bars
-    LevelManager.js   — level configs (speed, tint, goals…)
-*/
-
 // ── Canvas ───────────────────────────────────
 const CANVAS_W = screen.width;
 const CANVAS_H = 300;
 
-// ── World heights (edit here to rebalance) ───
+// ── World heights ────────────────────────────
 const GROUND = 230;
 const PLATFORM_Y = 200;
 const AIR_SPIKE_Y = 110;
@@ -44,16 +12,16 @@ const MAX_INTENSITY = 100;
 const BOOST_DURATION = 200;
 
 // ── Asset variables ───────────────────────────
-let imgBg;
+let allBgLayers = [[], [], []]; // one array of images per level
+let layerOffsets = []; // scrollX per layer
 let imgIdle;
 let imgRun;
 let imgBoost;
-let bgX = 0;
 let raindrops = [];
 
 // ── Game-state variables ─────────────────────
-let state = "start"; // "start" | "levelintro" | "play" | "levelclear" | "win" | "lose"
-let startScreen = "title"; // "title" | "instructions"
+let state = "start";
+let startScreen = "title";
 
 let player;
 let spikeManager;
@@ -61,8 +29,8 @@ let platformManager;
 let hud;
 let levelManager;
 
-let score = 0; // total spikes dodged across the whole run
-let levelScore = 0; // spikes dodged THIS level (resets each level)
+let score = 0;
+let levelScore = 0;
 let intensity = 0;
 let streak = 0;
 
@@ -76,11 +44,18 @@ let misses = 0;
 let shakeActive = false;
 let shakeSuccess = 0;
 
-let levelClearTimer = 0; // countdown (frames) before auto-advancing
+let levelClearTimer = 0;
 
 // ── p5 preload ────────────────────────────────
 function preload() {
-  imgBg = loadImage("assets/10_17.png");
+  levelManager = new LevelManager();
+
+  for (let i = 0; i < levelManager.levels.length; i++) {
+    allBgLayers[i] = levelManager.levels[i].bgLayers.map((l) =>
+      loadImage(l.path),
+    );
+  }
+
   imgIdle = loadImage("assets/standing-skin.gif");
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
@@ -91,7 +66,7 @@ function setup() {
   createCanvas(CANVAS_W, CANVAS_H);
   frameRate(60);
 
-  levelManager = new LevelManager();
+  // levelManager already created in preload
   player = new Player();
   spikeManager = new SpikeManager();
   platformManager = new PlatformManager();
@@ -123,7 +98,7 @@ function resetGame() {
   shakeActive = false;
   shakeSuccess = 0;
 
-  bgX = 0;
+  layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
 
   startScreen = "title";
@@ -144,6 +119,8 @@ function startNextLevel() {
   shakeActive = false;
   shakeSuccess = 0;
   misses = 0;
+
+  layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
 }
 
@@ -151,25 +128,31 @@ function startNextLevel() {
 function draw() {
   background(245);
 
-  const lvl = levelManager.current; // shortcut to current level config
+  const lvl = levelManager.current;
 
-  // ── Scrolling background ──────────────────
-  if (state === "play") {
-    let bgSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
-    if (shakeActive) bgSpeed *= 1.25;
-    bgX -= bgSpeed;
-  }
+  // ── Parallax background layers ────────────
+  const layers = allBgLayers[levelManager.currentIndex];
+  for (let i = 0; i < layers.length; i++) {
+    const img = layers[i];
+    const layerSpeed = lvl.bgLayers[i].speed;
 
-  if (imgBg) {
-    let imgW = imgBg.width;
-    let x = bgX % imgW;
-    if (x > 0) x -= imgW;
-    for (let i = 0; i * imgW < width + imgW; i++) {
-      image(imgBg, x + i * imgW, 0, imgW, CANVAS_H);
+    if (state === "play") {
+      let baseSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
+      if (shakeActive) baseSpeed *= 1.25;
+      layerOffsets[i] -= baseSpeed * layerSpeed;
+    }
+
+    if (img) {
+      let imgW = img.width;
+      let x = layerOffsets[i] % imgW;
+      if (x > 0) x -= imgW;
+      for (let j = 0; j * imgW < width + imgW; j++) {
+        image(img, x + j * imgW, 0, imgW + 2, CANVAS_H);
+      }
     }
   }
 
-  // ── Per-level bg tint (always drawn over bg) ──
+  // ── Per-level bg tint ─────────────────────
   if (lvl.bgTint && state === "play") {
     noStroke();
     fill(...lvl.bgTint);
@@ -185,7 +168,7 @@ function draw() {
 
   updateAndDrawRain();
 
-  // Ground line (colour changes per level)
+  // Ground line
   stroke(...lvl.groundStroke);
   line(0, GROUND + player.h, width, GROUND + player.h);
   noStroke();
@@ -365,7 +348,6 @@ function draw() {
       height / 2 + 35,
     );
 
-    // Auto-advance after 3 seconds (180 frames)
     levelClearTimer--;
     if (levelClearTimer <= 0) advanceLevel();
 
@@ -414,7 +396,6 @@ function draw() {
 
     if (hitCooldown > 0) hitCooldown--;
 
-    // Speed uses per-level base + bonus
     let gameSpeed =
       lvl.baseSpeed + map(intensity, 0, MAX_INTENSITY, 0, lvl.maxSpeedBonus);
     if (shakeActive) gameSpeed *= 1.25;
@@ -427,10 +408,9 @@ function draw() {
     checkScore();
     checkCollision();
 
-    // Check level-clear condition
     if (levelScore >= lvl.dodgeGoal) {
       state = "levelclear";
-      levelClearTimer = 180; // 3 seconds at 60 fps
+      levelClearTimer = 180;
       return;
     }
 
@@ -472,7 +452,7 @@ function draw() {
     text("GAME OVER", width / 2, height / 2 - 10);
     textSize(18);
     text(
-      "Score: " + score + "   |   Press R to Restart",
+      "Score: " + score + "   |   Press R to Retry Level",
       width / 2,
       height / 2 + 22,
     );
@@ -635,7 +615,12 @@ function keyPressed() {
       state === "levelclear") &&
     (key === "r" || key === "R")
   ) {
-    resetGame();
-    state = "play";
+    if (state === "win") {
+      resetGame();
+      state = "play";
+    } else {
+      startNextLevel();
+      state = "play";
+    }
   }
 }
