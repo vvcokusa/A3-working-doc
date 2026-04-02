@@ -66,7 +66,7 @@ function preload() {
 
 // ── p5 setup ─────────────────────────────────
 function setup() {
-  createCanvas(CANVAS_W, CANVAS_H, "pixelated");
+  createCanvas(CANVAS_W, CANVAS_H);
   frameRate(60);
 
   player = new Player();
