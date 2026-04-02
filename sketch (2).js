@@ -48,6 +48,10 @@ let shakeSuccess = 0;
 
 let levelClearTimer = 0;
 
+let checkpointReached = false;
+let checkpointLevel = 0;
+let checkpointData = null;
+
 // ── p5 preload ────────────────────────────────
 function preload() {
   levelManager = new LevelManager();
@@ -105,6 +109,10 @@ function resetGame() {
   birds = [];
 
   startScreen = "title";
+
+  checkpointReached = false;
+  checkpointLevel = 0;
+  checkpointData = null;
 }
 
 // ── Start a fresh level (keeps score + hearts) ─
@@ -126,6 +134,65 @@ function startNextLevel() {
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
   birds = [];
+
+  checkpointReached = false;
+  checkpointLevel = levelManager.currentIndex;
+  checkpointData = null;
+}
+
+function getCheckpointGoal() {
+  return Math.floor(levelManager.current.dodgeGoal / 2);
+}
+
+function saveCheckpoint() {
+  checkpointReached = true;
+  checkpointLevel = levelManager.currentIndex;
+
+  checkpointData = {
+    score: score,
+    levelScore: levelScore,
+    intensity: intensity,
+    streak: streak,
+    boostActive: boostActive,
+    boostTimer: boostTimer,
+    hearts: 5,
+    hitCooldown: 0,
+    misses: 0,
+    shakeActive: false,
+    shakeSuccess: 0,
+    layerOffsets: [...layerOffsets]
+  };
+}
+
+function respawnFromCheckpoint() {
+  if (!checkpointReached || checkpointLevel !== levelManager.currentIndex || !checkpointData) {
+    startNextLevel();
+    state = "play";
+    return;
+  }
+
+  player.reset();
+  spikeManager.reset();
+  platformManager.reset();
+
+  score = checkpointData.score;
+  levelScore = checkpointData.levelScore;
+  intensity = checkpointData.intensity;
+  streak = checkpointData.streak;
+  boostActive = checkpointData.boostActive;
+  boostTimer = checkpointData.boostTimer;
+
+  hearts = checkpointData.hearts;
+  hitCooldown = checkpointData.hitCooldown;
+
+  misses = checkpointData.misses;
+  shakeActive = checkpointData.shakeActive;
+  shakeSuccess = checkpointData.shakeSuccess;
+
+  layerOffsets = [...checkpointData.layerOffsets];
+  raindrops = [];
+
+  state = "play";
 }
 
 // ── Main draw loop ────────────────────────────
@@ -574,7 +641,11 @@ function checkCollision() {
       if (shakeActive) {
         hearts = max(0, hearts - 1);
         if (hearts <= 0) {
-          state = "lose";
+          if (checkpointReached && checkpointLevel === levelManager.currentIndex) {
+            respawnFromCheckpoint();
+          } else {
+            state = "lose";
+          }
           return;
         }
       } else {
@@ -597,6 +668,10 @@ function checkScore() {
       score++;
       levelScore++;
       s.scored = true;
+
+      if (!checkpointReached && levelScore >= getCheckpointGoal()) {
+        saveCheckpoint();
+      }
 
       if (shakeActive) {
         shakeSuccess++;
