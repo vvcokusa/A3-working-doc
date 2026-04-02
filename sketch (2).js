@@ -52,7 +52,7 @@ let bgX = 0;
 let raindrops = [];
 
 // ── Game-state variables ─────────────────────
-let state = "start"; // "start" | "play" | "levelclear" | "win" | "lose"
+let state = "start"; // "start" | "levelintro" | "play" | "levelclear" | "win" | "lose"
 let startScreen = "title"; // "title" | "instructions"
 
 let player;
@@ -61,8 +61,8 @@ let platformManager;
 let hud;
 let levelManager;
 
-let score = 0;        // total spikes dodged across the whole run
-let levelScore = 0;   // spikes dodged THIS level (resets each level)
+let score = 0; // total spikes dodged across the whole run
+let levelScore = 0; // spikes dodged THIS level (resets each level)
 let intensity = 0;
 let streak = 0;
 
@@ -80,9 +80,9 @@ let levelClearTimer = 0; // countdown (frames) before auto-advancing
 
 // ── p5 preload ────────────────────────────────
 function preload() {
-  imgBg    = loadImage("assets/10_17.png");
-  imgIdle  = loadImage("assets/standing-skin.gif");
-  imgRun   = loadImage("assets/running-skin.gif");
+  imgBg = loadImage("assets/10_17.png");
+  imgIdle = loadImage("assets/standing-skin.gif");
+  imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
 }
 
@@ -91,11 +91,11 @@ function setup() {
   createCanvas(CANVAS_W, CANVAS_H);
   frameRate(60);
 
-  levelManager    = new LevelManager();
-  player          = new Player();
-  spikeManager    = new SpikeManager();
+  levelManager = new LevelManager();
+  player = new Player();
+  spikeManager = new SpikeManager();
   platformManager = new PlatformManager();
-  hud             = new HUD();
+  hud = new HUD();
 
   resetGame();
 }
@@ -108,22 +108,22 @@ function resetGame() {
   spikeManager.reset();
   platformManager.reset();
 
-  score      = 0;
+  score = 0;
   levelScore = 0;
-  intensity  = 0;
-  streak     = 0;
+  intensity = 0;
+  streak = 0;
 
   boostActive = false;
-  boostTimer  = 0;
+  boostTimer = 0;
 
-  hearts      = 5;
+  hearts = 5;
   hitCooldown = 0;
 
-  misses       = 0;
-  shakeActive  = false;
+  misses = 0;
+  shakeActive = false;
   shakeSuccess = 0;
 
-  bgX       = 0;
+  bgX = 0;
   raindrops = [];
 
   startScreen = "title";
@@ -135,16 +135,16 @@ function startNextLevel() {
   spikeManager.reset();
   platformManager.reset();
 
-  levelScore  = 0;
-  intensity   = 0;
-  streak      = 0;
+  levelScore = 0;
+  intensity = 0;
+  streak = 0;
   boostActive = false;
-  boostTimer  = 0;
+  boostTimer = 0;
   hitCooldown = 0;
-  shakeActive  = false;
+  shakeActive = false;
   shakeSuccess = 0;
-  misses       = 0;
-  raindrops    = [];
+  misses = 0;
+  raindrops = [];
 }
 
 // ── Main draw loop ────────────────────────────
@@ -205,19 +205,28 @@ function draw() {
       fill(255, 220, 50);
       textSize(100);
       textStyle(BOLD);
-      text("BPDash", width / 2, height / 2 + 10);
+      text("Between Floor", width / 2, height / 2 - 50);
+
+      textStyle(NORMAL);
+      fill(255);
+      textSize(18);
+      text("LEVELS", width / 2, height / 2 + 10);
+      textSize(14);
+      text("1. Fractured Skylines", width / 2, height / 2 + 34);
+      text("2. Sky", width / 2, height / 2 + 54);
+      text("3. Cave", width / 2, height / 2 + 74);
 
       stroke(255, 255, 255, 80);
-      line(width / 2 - 120, height / 2 + 30, width / 2 + 120, height / 2 + 30);
+      line(width / 2 - 120, height / 2 + 90, width / 2 + 120, height / 2 + 90);
       noStroke();
 
       fill(255);
       textSize(16);
-      text("ENTER — Start Game", width / 2, height / 2 + 57);
+      text("ENTER — Start Game", width / 2, height / 2 + 118);
 
       fill(180);
       textSize(13);
-      text("I — Instructions", width / 2, height / 2 + 80);
+      text("I — Instructions", width / 2, height / 2 + 138);
     }
 
     if (startScreen === "instructions") {
@@ -243,7 +252,8 @@ function draw() {
       textSize(13);
       text(
         "SPACE — Jump     |     R — Restart     |     DOUBLE SPACE — Double Jump",
-        width / 2, 100,
+        width / 2,
+        100,
       );
 
       stroke(255, 255, 255, 40);
@@ -262,24 +272,66 @@ function draw() {
       fill(255, 130, 130);
       text(
         "Red hanging spikes are dangerous when you're on a platform!",
-        width / 2, 186,
+        width / 2,
+        186,
       );
 
       fill(255);
       text("Clear 5 spikes in a row to activate a JUMP BOOST!", width / 2, 204);
       text(
         "If you hit a spike you enter SHAKE MODE! Clear 5 spikes to recover.",
-        width / 2, 222,
+        width / 2,
+        222,
       );
       text(
         "You have 5 hearts. Hit a spike and lose 1 heart. Reach 0 and it's game over.",
-        width / 2, 240,
+        width / 2,
+        240,
       );
 
       fill(180);
       textSize(12);
       text("B — Back to Title     |     ENTER — Start Game", width / 2, 270);
     }
+
+    return;
+  }
+
+  // ══════════════════════════════════════════
+  //  LEVEL INTRO SCREEN
+  // ══════════════════════════════════════════
+  if (state === "levelintro") {
+    platformManager.draw();
+    player.draw(false, imgIdle);
+
+    fill(0, 0, 0, 200);
+    rect(0, 0, width, height);
+
+    textAlign(CENTER);
+    fill(255, 220, 50);
+    textSize(44);
+    textStyle(BOLD);
+    text(
+      "Level " + (levelManager.currentIndex + 1),
+      width / 2,
+      height / 2 - 40,
+    );
+
+    textSize(28);
+    text(
+      levelManager.current.name.replace(/^Level \d+\s*—\s*/, ""),
+      width / 2,
+      height / 2,
+    );
+
+    textStyle(NORMAL);
+    fill(255);
+    textSize(14);
+    text(levelManager.current.message, width / 2, height / 2 + 30);
+
+    fill(180);
+    textSize(13);
+    text("ENTER — Begin Level", width / 2, height / 2 + 70);
 
     return;
   }
@@ -309,7 +361,8 @@ function draw() {
     textSize(13);
     text(
       "ENTER — Continue   |   R — Restart from Level 1",
-      width / 2, height / 2 + 35,
+      width / 2,
+      height / 2 + 35,
     );
 
     // Auto-advance after 3 seconds (180 frames)
@@ -335,7 +388,11 @@ function draw() {
 
     fill(255);
     textSize(16);
-    text("Total score: " + score + " spikes dodged", width / 2, height / 2 + 10);
+    text(
+      "Total score: " + score + " spikes dodged",
+      width / 2,
+      height / 2 + 10,
+    );
 
     fill(180);
     textSize(13);
@@ -358,7 +415,8 @@ function draw() {
     if (hitCooldown > 0) hitCooldown--;
 
     // Speed uses per-level base + bonus
-    let gameSpeed = lvl.baseSpeed + map(intensity, 0, MAX_INTENSITY, 0, lvl.maxSpeedBonus);
+    let gameSpeed =
+      lvl.baseSpeed + map(intensity, 0, MAX_INTENSITY, 0, lvl.maxSpeedBonus);
     if (shakeActive) gameSpeed *= 1.25;
 
     player.update(intensity, MAX_INTENSITY, platformManager.platforms);
@@ -415,7 +473,8 @@ function draw() {
     textSize(18);
     text(
       "Score: " + score + "   |   Press R to Restart",
-      width / 2, height / 2 + 22,
+      width / 2,
+      height / 2 + 22,
     );
   }
 }
@@ -425,7 +484,7 @@ function advanceLevel() {
   const advanced = levelManager.advance();
   if (advanced) {
     startNextLevel();
-    state = "play";
+    state = "levelintro";
   } else {
     state = "win";
   }
@@ -488,10 +547,10 @@ function checkCollision() {
           return;
         }
       } else {
-        shakeActive  = true;
+        shakeActive = true;
         shakeSuccess = 0;
-        boostActive  = false;
-        boostTimer   = 0;
+        boostActive = false;
+        boostTimer = 0;
       }
 
       streak = 0;
@@ -511,9 +570,9 @@ function checkScore() {
       if (shakeActive) {
         shakeSuccess++;
         if (shakeSuccess >= 5) {
-          shakeActive  = false;
+          shakeActive = false;
           shakeSuccess = 0;
-          misses       = 0;
+          misses = 0;
         }
       }
 
@@ -521,8 +580,8 @@ function checkScore() {
         streak++;
         if (streak >= 5) {
           boostActive = true;
-          boostTimer  = BOOST_DURATION;
-          streak      = 0;
+          boostTimer = BOOST_DURATION;
+          streak = 0;
         }
       }
     }
@@ -549,12 +608,16 @@ function keyPressed() {
   if (state === "start") {
     if (keyCode === ENTER) {
       startScreen = "title";
-      state = "play";
+      state = "levelintro";
     }
     if (key === "i" || key === "I") startScreen = "instructions";
     if ((key === "b" || key === "B") && startScreen === "instructions") {
       startScreen = "title";
     }
+  }
+
+  if (state === "levelintro" && keyCode === ENTER) {
+    state = "play";
   }
 
   if (state === "levelclear" && keyCode === ENTER) {
@@ -565,8 +628,13 @@ function keyPressed() {
     player.jump(boostActive);
   }
 
-  if ((state === "lose" || state === "play" || state === "win" || state === "levelclear") &&
-      (key === "r" || key === "R")) {
+  if (
+    (state === "lose" ||
+      state === "play" ||
+      state === "win" ||
+      state === "levelclear") &&
+    (key === "r" || key === "R")
+  ) {
     resetGame();
     state = "play";
   }

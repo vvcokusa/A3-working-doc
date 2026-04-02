@@ -177,21 +177,31 @@ function draw() {
       fill(255, 220, 50);
       textSize(100);
       textStyle(BOLD);
-      text("BPDash", width / 2, height / 2 + 10);
+      text("Between Floor", width / 2, height / 2 - 50);
+
+      // Level list
+      textStyle(NORMAL);
+      fill(255);
+      textSize(18);
+      text("LEVELS", width / 2, height / 2 + 10);
+      textSize(14);
+      text("1. Fractured Skylines", width / 2, height / 2 + 34);
+      text("2. Sky", width / 2, height / 2 + 54);
+      text("3. Cave", width / 2, height / 2 + 74);
 
       // Divider line
       stroke(255, 255, 255, 80);
-      line(width / 2 - 120, height / 2 + 30, width / 2 + 120, height / 2 + 30);
+      line(width / 2 - 120, height / 2 + 90, width / 2 + 120, height / 2 + 90);
       noStroke();
 
       // Prompts
       fill(255);
       textSize(16);
-      text("ENTER — Start Game", width / 2, height / 2 + 57);
+      text("ENTER — Start Game", width / 2, height / 2 + 118);
 
       fill(180);
       textSize(13);
-      text("I — Instructions", width / 2, height / 2 + 80);
+      text("I — Instructions", width / 2, height / 2 + 138);
     }
 
     // ── Instructions sub-screen ────────────
