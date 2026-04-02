@@ -2,15 +2,12 @@
   index.html
   ─────────────────────────────────────────────
   Main entry point for the A2 Mid-Term Game.
-  Loads the CSS stylesheet, p5.js library, and
-  all game class files in order before the main
-  sketch.js. The p5 canvas is injected into
-  the #page container.
 
   Script load order (important):
     1. p5.js library
     2. Game classes (Player, Spike, etc.)
-    3. Main sketch.js (uses classes + globals)
+    3. LevelManager.js  ← new — defines all level configs
+    4. Main sketch.js (uses classes + globals)
 -->
 <!doctype html>
 <html lang="en">
@@ -35,8 +32,9 @@
     <script src="Platform.js"></script>
     <script src="PlatformManager.js"></script>
     <script src="HUD.js"></script>
+    <script src="LevelManager.js"></script>
 
-    <!-- Main sketch last (defines global constants classes reference) -->
+    <!-- Main sketch last -->
     <script src="sketch.js"></script>
   </body>
 </html>

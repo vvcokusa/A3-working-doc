@@ -2,11 +2,11 @@
   Platform.js
   ─────────────────────────────────────────────
   A single scrolling platform.
-  PlatformManager owns the list and moves them.
-  Player.js reads the list for landing collision.
 
-  Edit PLATFORM_Y in sketch.js to change
-  the height all platforms spawn at.
+  draw() accepts an optional colOverride array
+  [r, g, b] from the level config so platform
+  colour changes per level. Falls back to the
+  original pink if nothing is passed.
 */
 
 class Platform {
@@ -17,13 +17,19 @@ class Platform {
     this.h = h;
   }
 
-  draw() {
-    fill(222, 153, 182); // #DE99B6 pink
+  // colOverride — optional [r,g,b] from PlatformManager / level config
+  draw(colOverride) {
+    const [r, g, b] = colOverride || [222, 153, 182]; // default pink
+    fill(r, g, b);
     noStroke();
     rect(this.x, this.y, this.w, this.h, 4);
 
-    // Subtle top highlight so it reads as a surface
-    fill(235, 200, 220);
+    // Subtle top highlight
+    fill(
+      min(r + 30, 255),
+      min(g + 30, 255),
+      min(b + 30, 255),
+    );
     rect(this.x + 4, this.y, this.w - 8, 3, 2);
   }
 }
