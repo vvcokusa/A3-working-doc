@@ -27,7 +27,7 @@ class LevelManager {
       // ── Level 1 — The City ──────────────────
       {
         name: "Level 1 — The City",
-        dodgeGoal: 100,
+        dodgeGoal: 20,
         bgTint: null, // no extra tint; default pink city bg
         groundStroke: [40, 40, 40],
         airSpikeChance: 0.35,
@@ -42,10 +42,10 @@ class LevelManager {
       // ── Level 2 — The Storm ─────────────────
       {
         name: "Level 2 — The Storm",
-        dodgeGoal: 100,
+        dodgeGoal: 20,
         bgTint: [10, 20, 70, 100], // blue storm tint always on
         groundStroke: [80, 120, 200],
-        airSpikeChance: 0.50, // more air spikes = trickier
+        airSpikeChance: 0.5, // more air spikes = trickier
         baseSpeed: 5, // faster than level 1
         maxSpeedBonus: 1.5,
         spawnRateMin: 60,
@@ -57,10 +57,10 @@ class LevelManager {
       // ── Level 3 — The Void ──────────────────
       {
         name: "Level 3 — The Void",
-        dodgeGoal: 100,
+        dodgeGoal: 20,
         bgTint: [5, 0, 20, 180], // near-black void tint
         groundStroke: [180, 50, 220],
-        airSpikeChance: 0.60, // mostly air spikes
+        airSpikeChance: 0.6, // mostly air spikes
         baseSpeed: 6, // fastest
         maxSpeedBonus: 2,
         spawnRateMin: 50,

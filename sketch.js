@@ -9,7 +9,7 @@
     • Game-state variables (score, intensity, etc.)
     • setup / draw / keyPressed
     • Collision detection (Player ↔ Spikes)
-    • Screen-state machine: "start" → "play" → "lose"
+    • Screen-state machine: "start" → "play" → "win" / "lose"
 
   To change how things LOOK or MOVE, edit the
   matching class file instead of this one:
@@ -53,7 +53,7 @@ let bgX = 0; // scrolling background x offset
 let raindrops = []; // rain particles (active during shake)
 
 // ── Game-state variables ─────────────────────
-let state = "start";
+let state = "start"; // "start" | "play" | "win" | "lose"
 let startScreen = "title";
 
 let player;
@@ -260,6 +260,7 @@ function draw() {
         width / 2,
         240,
       );
+      text("Dodge 20 spikes to win the game!", width / 2, 258);
 
       // Back prompt
       fill(180);
@@ -297,6 +298,11 @@ function draw() {
     checkScore();
     checkCollision();
 
+    if (score >= 20) {
+      state = "win";
+      return;
+    }
+
     // ── Draw (with optional screen-shake) ──
     push();
     if (shakeActive) translate(random(-4, 4), random(-4, 4));
@@ -314,6 +320,28 @@ function draw() {
       boostActive,
       shakeActive,
     );
+  }
+
+  // ── Win screen ───────────────────────────
+  if (state === "win") {
+    platformManager.draw();
+    spikeManager.draw(intensity, MAX_INTENSITY);
+    player.draw(false, imgRun);
+    fill(0, 0, 0, 160);
+    rect(0, 0, width, height);
+
+    textAlign(CENTER);
+    fill(255, 220, 50);
+    textSize(42);
+    text("YOU WIN!", width / 2, height / 2 - 20);
+    fill(255);
+    textSize(18);
+    text("Score: " + score + " spikes dodged", width / 2, height / 2 + 18);
+    fill(180);
+    textSize(13);
+    text("Press R to play again", width / 2, height / 2 + 40);
+
+    return;
   }
 
   // ── Lose screen ───────────────────────────
@@ -482,7 +510,10 @@ function keyPressed() {
     player.jump(boostActive);
   }
 
-  if ((state === "lose" || state === "play") && (key === "r" || key === "R")) {
+  if (
+    (state === "lose" || state === "play" || state === "win") &&
+    (key === "r" || key === "R")
+  ) {
     resetGame();
     state = "play";
   }
