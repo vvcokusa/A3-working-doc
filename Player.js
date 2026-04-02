@@ -22,6 +22,7 @@ class Player {
     this.vy = 0;
     this.onGround = true;
     this.jumpCount = 0; // tracks jumps used (0, 1, or 2 for double jump)
+    this.currentPlatform = null;
   }
 
   // ── Reset to starting state ──────────────────
@@ -30,6 +31,7 @@ class Player {
     this.vy = 0;
     this.onGround = true;
     this.jumpCount = 0;
+    this.currentPlatform = null;
   }
 
   // ── Physics update ───────────────────────────
@@ -51,6 +53,7 @@ class Player {
       this.vy = 0;
       this.onGround = true;
       this.jumpCount = 0; // reset jumps when landing on ground
+      this.currentPlatform = null;
     }
 
     // ── Platform collisions ──────────────────
@@ -67,8 +70,21 @@ class Player {
           this.vy = 0;
           this.onGround = true;
           this.jumpCount = 0; // reset jumps when landing on platform
+          this.currentPlatform = p;
           break;
         }
+      }
+    }
+
+    // Check if still on current platform and increment standTimer
+    if (this.onGround && this.currentPlatform) {
+      const inXRange = this.x + this.w > this.currentPlatform.x + 4 && this.x < this.currentPlatform.x + this.currentPlatform.w - 4;
+      const onTop = this.y + this.h === this.currentPlatform.y;
+      if (inXRange && onTop) {
+        this.currentPlatform.standTimer++;
+      } else {
+        this.onGround = false;
+        this.currentPlatform = null;
       }
     }
   }
@@ -89,6 +105,7 @@ class Player {
             : -13; // second jump (higher!)
       this.vy = jumpPower;
       this.onGround = false; // not on ground while jumping
+      this.currentPlatform = null; // no longer on platform when jumping
     }
   }
 

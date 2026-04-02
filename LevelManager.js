@@ -20,6 +20,7 @@ class LevelManager {
         spawnRateMin: 70,
         spawnRateMax: 100,
         platformColor: [222, 153, 182],
+        hasPlatforms: true,
         message: "You survived Fractured Skylines! Heading deeper...",
       },
 
@@ -41,7 +42,8 @@ class LevelManager {
         maxSpeedBonus: 1.5,
         spawnRateMin: 60,
         spawnRateMax: 90,
-        platformColor: [255, 255, 255, 0],
+        platformColor: [200, 200, 255],
+        hasPlatforms: true,
         message: "You cleared Sky! One final challenge awaits...",
       },
 
@@ -63,7 +65,8 @@ class LevelManager {
         maxSpeedBonus: 2,
         spawnRateMin: 50,
         spawnRateMax: 80,
-        platformColor: [120, 40, 180],
+        platformColor: [150, 100, 200],
+        hasPlatforms: true,
         message: "You escaped the Cave. You win!",
       },
     ];
