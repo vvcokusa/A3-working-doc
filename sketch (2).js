@@ -17,7 +17,9 @@ let layerOffsets = []; // scrollX per layer
 let imgIdle;
 let imgRun;
 let imgBoost;
+let imgBird;
 let raindrops = [];
+let birds = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -46,6 +48,10 @@ let shakeSuccess = 0;
 
 let levelClearTimer = 0;
 
+let checkpointReached = false;
+let checkpointLevel = 0;
+let checkpointData = null;
+
 // ── p5 preload ────────────────────────────────
 function preload() {
   levelManager = new LevelManager();
@@ -59,6 +65,7 @@ function preload() {
   imgIdle = loadImage("assets/standing-skin.gif");
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
+  imgBird = loadImage("assets/birdfly.png");
 }
 
 // ── p5 setup ─────────────────────────────────
@@ -66,7 +73,6 @@ function setup() {
   createCanvas(CANVAS_W, CANVAS_H);
   frameRate(60);
 
-  // levelManager already created in preload
   player = new Player();
   spikeManager = new SpikeManager();
   platformManager = new PlatformManager();
@@ -100,8 +106,13 @@ function resetGame() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
 
   startScreen = "title";
+
+  checkpointReached = false;
+  checkpointLevel = 0;
+  checkpointData = null;
 }
 
 // ── Start a fresh level (keeps score + hearts) ─
@@ -122,6 +133,66 @@ function startNextLevel() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
+
+  checkpointReached = false;
+  checkpointLevel = levelManager.currentIndex;
+  checkpointData = null;
+}
+
+function getCheckpointGoal() {
+  return Math.floor(levelManager.current.dodgeGoal / 2);
+}
+
+function saveCheckpoint() {
+  checkpointReached = true;
+  checkpointLevel = levelManager.currentIndex;
+
+  checkpointData = {
+    score: score,
+    levelScore: levelScore,
+    intensity: intensity,
+    streak: streak,
+    boostActive: boostActive,
+    boostTimer: boostTimer,
+    hearts: 5,
+    hitCooldown: 0,
+    misses: 0,
+    shakeActive: false,
+    shakeSuccess: 0,
+    layerOffsets: [...layerOffsets]
+  };
+}
+
+function respawnFromCheckpoint() {
+  if (!checkpointReached || checkpointLevel !== levelManager.currentIndex || !checkpointData) {
+    startNextLevel();
+    state = "play";
+    return;
+  }
+
+  player.reset();
+  spikeManager.reset();
+  platformManager.reset();
+
+  score = checkpointData.score;
+  levelScore = checkpointData.levelScore;
+  intensity = checkpointData.intensity;
+  streak = checkpointData.streak;
+  boostActive = checkpointData.boostActive;
+  boostTimer = checkpointData.boostTimer;
+
+  hearts = checkpointData.hearts;
+  hitCooldown = checkpointData.hitCooldown;
+
+  misses = checkpointData.misses;
+  shakeActive = checkpointData.shakeActive;
+  shakeSuccess = checkpointData.shakeSuccess;
+
+  layerOffsets = [...checkpointData.layerOffsets];
+  raindrops = [];
+
+  state = "play";
 }
 
 // ── Main draw loop ────────────────────────────
@@ -147,7 +218,7 @@ function draw() {
       let x = layerOffsets[i] % imgW;
       if (x > 0) x -= imgW;
       for (let j = 0; j * imgW < width + imgW; j++) {
-        image(img, x + j * imgW, 0, imgW + 2, CANVAS_H);
+        image(img, x + j * imgW - 1, 0, imgW + 2, CANVAS_H);
       }
     }
   }
@@ -408,6 +479,14 @@ function draw() {
     checkScore();
     checkCollision();
 
+    // ── Birds (level 2 only) ──────────────
+    if (levelManager.currentIndex === 1) {
+      if (frameCount % floor(random(180, 300)) === 0) {
+        spawnBird();
+      }
+      updateAndDrawBirds();
+    }
+
     if (levelScore >= lvl.dodgeGoal) {
       state = "levelclear";
       levelClearTimer = 180;
@@ -470,6 +549,45 @@ function advanceLevel() {
   }
 }
 
+// ── Bird spawning ─────────────────────────────
+function spawnBird() {
+  birds.push({
+    x: width + 50,
+    y: random(40, 160),
+    speed: random(2, 4),
+    frame: 0,
+    frameTimer: 0,
+    frameRate: 6,
+  });
+}
+
+// ── Bird update + draw ────────────────────────
+function updateAndDrawBirds() {
+  for (let b of birds) {
+    b.frameTimer++;
+    if (b.frameTimer >= b.frameRate) {
+      b.frame = (b.frame + 1) % 6;
+      b.frameTimer = 0;
+    }
+
+    b.x -= b.speed;
+
+    let sx = b.frame * 32;
+    image(imgBird, b.x, b.y, 32, 32, sx, 0, 32, 32);
+
+    const overlapX = player.x + player.w > b.x + 4 && player.x < b.x + 28;
+    const overlapY = player.y + player.h > b.y + 4 && player.y < b.y + 28;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      hearts = max(0, hearts - 1);
+      hitCooldown = 60;
+      if (hearts <= 0) state = "lose";
+    }
+  }
+
+  birds = birds.filter((b) => b.x > -50);
+}
+
 // ── Rain effect ───────────────────────────────
 function updateAndDrawRain() {
   if (!shakeActive) {
@@ -523,7 +641,11 @@ function checkCollision() {
       if (shakeActive) {
         hearts = max(0, hearts - 1);
         if (hearts <= 0) {
-          state = "lose";
+          if (checkpointReached && checkpointLevel === levelManager.currentIndex) {
+            respawnFromCheckpoint();
+          } else {
+            state = "lose";
+          }
           return;
         }
       } else {
@@ -546,6 +668,10 @@ function checkScore() {
       score++;
       levelScore++;
       s.scored = true;
+
+      if (!checkpointReached && levelScore >= getCheckpointGoal()) {
+        saveCheckpoint();
+      }
 
       if (shakeActive) {
         shakeSuccess++;
