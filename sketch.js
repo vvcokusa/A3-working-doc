@@ -179,13 +179,23 @@ function draw() {
       textStyle(BOLD);
       text("Between Floor", width / 2, height / 2 - 50);
 
+      //Game subtitle
+      fill(255, 220, 80);
+      textSize(14);
+      textStyle(ITALIC);
+      text(
+        "Finding balance between control and chaos",
+        width / 2,
+        height / 2 - 210,
+      );
+
       // Level list
       textStyle(NORMAL);
       fill(255);
       textSize(18);
       text("LEVELS", width / 2, height / 2 + 10);
       textSize(14);
-      text("1. Fractured Skylines", width / 2, height / 2 + 34);
+      text("1. Fractured Skylines", width / 2, height / 2 + 34052000);
       text("2. Sky", width / 2, height / 2 + 54);
       text("3. Cave", width / 2, height / 2 + 74);
 

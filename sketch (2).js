@@ -52,6 +52,8 @@ let checkpointReached = false;
 let checkpointLevel = 0;
 let checkpointData = null;
 
+let enterPromptAlpha = 255;
+
 // ── p5 preload ────────────────────────────────
 function preload() {
   levelManager = new LevelManager();
@@ -248,6 +250,9 @@ function draw() {
   //  START SCREEN
   // ══════════════════════════════════════════
   if (state === "start") {
+    // Animate enter prompt opacity
+    enterPromptAlpha = 127 + 127 * sin(millis() * 0.002);
+
     platformManager.draw();
     player.draw(false, imgIdle);
 
@@ -261,26 +266,36 @@ function draw() {
       textStyle(BOLD);
       text("Between Floor", width / 2, height / 2 - 50);
 
+      //Game subtitle
+      fill(255, 180, 80);
+      textSize(16);
+      textStyle(ITALIC);
+      text(
+        "Finding balance between control and chaos",
+        width / 2,
+        height / 2 - 5,
+      );
+
       textStyle(NORMAL);
       fill(255);
       textSize(18);
-      text("LEVELS", width / 2, height / 2 + 10);
+      text("LEVELS", width / 2, height / 2 + 35);
       textSize(14);
-      text("1. Fractured Skylines", width / 2, height / 2 + 34);
-      text("2. Sky", width / 2, height / 2 + 54);
-      text("3. Cave", width / 2, height / 2 + 74);
+      text("1. Fractured Skylines", width / 2, height / 2 + 53);
+      text("2. Sky", width / 2, height / 2 + 68);
+      text("3. Cave", width / 2, height / 2 + 83);
 
       stroke(255, 255, 255, 80);
-      line(width / 2 - 120, height / 2 + 90, width / 2 + 120, height / 2 + 90);
+      line(width / 2 - 120, height / 2 + 95, width / 2 + 120, height / 2 + 95);
       noStroke();
 
-      fill(255);
+      fill(255, 180, 80, enterPromptAlpha);
       textSize(16);
-      text("ENTER — Start Game", width / 2, height / 2 + 118);
+      text("ENTER — Start Game", width / 2, height / 2 + 113);
 
       fill(180);
       textSize(13);
-      text("I — Instructions", width / 2, height / 2 + 138);
+      text("I — Instructions", width / 2, height / 2 + 128);
     }
 
     if (startScreen === "instructions") {
@@ -801,6 +816,8 @@ let shakeSuccess = 0;
 let levelClearTimer = 0;
 let levelOneSecondPlatformSpikeSpawned = false;
 
+let enterPromptAlpha = 255;
+
 // ── p5 preload ────────────────────────────────
 function preload() {
   levelManager = new LevelManager();
@@ -939,6 +956,9 @@ function draw() {
   //  START SCREEN
   // ══════════════════════════════════════════
   if (state === "start") {
+    // Animate enter prompt opacity
+    enterPromptAlpha = 127 + 127 * sin(millis() * 0.002);
+
     platformManager.draw();
     player.draw(false, imgIdle);
 
@@ -952,26 +972,36 @@ function draw() {
       textStyle(BOLD);
       text("Between Floor", width / 2, height / 2 - 50);
 
+      //Game subtitle
+      fill(255, 180, 80);
+      textSize(16);
+      textStyle(ITALIC);
+      text(
+        "Finding balance between control and chaos",
+        width / 2,
+        height / 2 - 5,
+      );
+
       textStyle(NORMAL);
       fill(255);
       textSize(18);
-      text("LEVELS", width / 2, height / 2 + 10);
+      text("LEVELS", width / 2, height / 2 + 35);
       textSize(14);
-      text("1. Fractured Skylines", width / 2, height / 2 + 34);
-      text("2. Sky", width / 2, height / 2 + 54);
-      text("3. Cave", width / 2, height / 2 + 74);
+      text("1. Fractured Skylines", width / 2, height / 2 + 53);
+      text("2. Sky", width / 2, height / 2 + 68);
+      text("3. Cave", width / 2, height / 2 + 83);
 
       stroke(255, 255, 255, 80);
-      line(width / 2 - 120, height / 2 + 90, width / 2 + 120, height / 2 + 90);
+      line(width / 2 - 120, height / 2 + 95, width / 2 + 120, height / 2 + 95);
       noStroke();
 
-      fill(255);
+      fill(255, 180, 80, enterPromptAlpha);
       textSize(16);
-      text("ENTER — Start Game", width / 2, height / 2 + 118);
+      text("ENTER — Start Game", width / 2, height / 2 + 113);
 
       fill(180);
       textSize(13);
-      text("I — Instructions", width / 2, height / 2 + 138);
+      text("I — Instructions", width / 2, height / 2 + 128);
     }
 
     if (startScreen === "instructions") {
