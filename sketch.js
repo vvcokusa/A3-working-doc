@@ -53,8 +53,20 @@ let bgX = 0; // scrolling background x offset
 let raindrops = []; // rain particles (active during shake)
 
 // ── Game-state variables ─────────────────────
-let state = "start"; // "start" | "play" | "win" | "lose"
+let state = "start"; // "start" | "narrative" | "play" | "win" | "lose"
 let startScreen = "title";
+
+// ── New narrative state variables ──────────
+let narrativeTimer = 0;
+let narrativeCharacterName = "Amaya";
+let narrativeLines = [
+  "Lorem ipsum dolor sit amet,",
+  "consectetur adipiscing elit,",
+  "sed do eiusmod tempor incididunt.",
+];
+let lineDelay = 300; // 5 seconds between line starts
+let fadeDuration = 150; // 2.5 seconds fade in, 2.5 seconds fade out
+let totalNarrativeTime;
 
 let player;
 let spikeManager;
@@ -131,15 +143,17 @@ function draw() {
     let bgSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
     if (shakeActive) bgSpeed *= 1.25;
     bgX -= bgSpeed;
+  } else if (state === "narrative") {
+    // Narrative uses Level 1 starting background speed
+    bgX -= 0.5;
   }
 
-  // Draw tiled background to cover entire canvas
+  // Draw tiled background once per frame
   if (imgBg) {
     let imgW = imgBg.width;
     let x = bgX % imgW;
     if (x > 0) x -= imgW; // start from left edge
 
-    // Draw image tiles to cover full width
     for (let i = 0; i * imgW < width + imgW; i++) {
       image(imgBg, x + i * imgW, 0, imgW, CANVAS_H);
     }
@@ -159,6 +173,38 @@ function draw() {
   stroke(40);
   line(0, GROUND + player.h, width, GROUND + player.h);
   noStroke();
+
+  // ── Narrative screen ──────────────────────
+  if (state === "narrative") {
+    // Increment narrative timer
+    narrativeTimer++;
+
+    // Update player (standing still while world moves)
+    player.update(0, MAX_INTENSITY, platformManager.platforms);
+
+    // Move platforms at Level 1 start speed
+    platformManager.update(2.0);
+
+    // Draw platforms (NO spikes)
+    platformManager.draw();
+
+    // Draw player
+    player.draw(false, imgRun);
+
+    // Draw HUD
+    hud.draw(0, 0, MAX_INTENSITY, hearts, 0, false, false);
+
+    // Draw narrative text (NO overlay)
+    drawNarrativeScreen();
+
+    // Check for transition
+    if (narrativeTimer > totalNarrativeTime) {
+      player.x = 90; // Reset player position
+      intensity = 0; // Reset intensity for smooth transition
+      state = "play";
+    }
+    return;
+  }
 
   // ── Start screen ──────────────────────────
   if (state === "start") {
@@ -195,7 +241,7 @@ function draw() {
       textSize(18);
       text("LEVELS", width / 2, height / 2 + 10);
       textSize(14);
-      text("1. Fractured Skylines", width / 2, height / 2 + 34052000);
+      text("1. Fractured Skylines", width / 2, height / 2 + 34);
       text("2. Sky", width / 2, height / 2 + 54);
       text("3. Cave", width / 2, height / 2 + 74);
 
@@ -418,6 +464,41 @@ function updateAndDrawRain() {
   raindrops = raindrops.filter((d) => d.y < height);
 }
 
+// ── New narrative helpers ───────────────────
+function resetNarrative() {
+  narrativeTimer = 0;
+  totalNarrativeTime =
+    (narrativeLines.length - 1) * lineDelay + fadeDuration * 2;
+  bgX = 0;
+}
+
+
+function getFadeAlpha(timer, startFrame, duration) {
+  let elapsed = timer - startFrame;
+  if (elapsed < 0) return 0;
+  if (elapsed < duration) return map(elapsed, 0, duration, 0, 255); // fade in
+  if (elapsed < duration * 2)
+    return map(elapsed, duration, duration * 2, 255, 0); // fade out
+  return 0;
+}
+
+function drawNarrativeScreen() {
+  textAlign(CENTER, CENTER);
+  fill(255, 210, 150);
+  textSize(32);
+  textStyle(BOLD);
+  text(narrativeCharacterName, width / 2, 65);
+
+  textSize(18);
+  textStyle(NORMAL);
+  for (let i = 0; i < narrativeLines.length; i++) {
+    let startFrame = i * lineDelay;
+    let alpha = getFadeAlpha(narrativeTimer, startFrame, fadeDuration);
+    fill(255, alpha);
+    text(narrativeLines[i], width / 2, 130 + i * 30);
+  }
+}
+
 // ── Collision: player hits a spike ───────────
 // Hitting a spike 3 times triggers shake.
 // Hearts are ONLY lost during the shake period.
@@ -516,7 +597,8 @@ function keyPressed() {
   if (state === "start") {
     if (keyCode === ENTER) {
       startScreen = "title"; // reset for next time
-      state = "play";
+      resetNarrative();
+      state = "narrative"; // new narrative state before Level 1 begins
     }
     if (key === "i" || key === "I") {
       startScreen = "instructions";

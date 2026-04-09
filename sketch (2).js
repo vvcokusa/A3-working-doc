@@ -209,9 +209,16 @@ function draw() {
     const img = layers[i];
     const layerSpeed = lvl.bgLayers[i].speed;
 
-    if (state === "play") {
-      let baseSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
-      if (shakeActive) baseSpeed *= 1.25;
+    if (state === "play" || state === "narrative") {
+      let baseSpeed;
+
+      if (state === "play") {
+        baseSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
+        if (shakeActive) baseSpeed *= 1.25;
+      } else {
+        baseSpeed = 1.5; // narrative background speed
+      }
+
       layerOffsets[i] -= baseSpeed * layerSpeed;
     }
 
@@ -816,6 +823,18 @@ let shakeSuccess = 0;
 let levelClearTimer = 0;
 let levelOneSecondPlatformSpikeSpawned = false;
 
+// ── New narrative state variables ──────────
+let narrativeTimer = 0;
+let narrativeCharacterName = "Amaya";
+let narrativeLines = [
+  "Lorem ipsum dolor sit amet,",
+  "consectetur adipiscing elit,",
+  "sed do eiusmod tempor incididunt.",
+];
+let lineDelay = 300; // 5 seconds between line starts
+let fadeDuration = 150; // 2.5 seconds fade in, 2.5 seconds fade out
+let totalNarrativeTime;
+
 let enterPromptAlpha = 255;
 
 // ── p5 preload ────────────────────────────────
@@ -915,9 +934,16 @@ function draw() {
     const img = layers[i];
     const layerSpeed = lvl.bgLayers[i].speed;
 
-    if (state === "play") {
-      let baseSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
-      if (shakeActive) baseSpeed *= 1.25;
+    if (state === "play" || state === "narrative") {
+      let baseSpeed;
+
+      if (state === "play") {
+        baseSpeed = map(intensity, 0, MAX_INTENSITY, 0.5, 2);
+        if (shakeActive) baseSpeed *= 1.25;
+      } else {
+        baseSpeed = 1.5;
+      }
+
       layerOffsets[i] -= baseSpeed * layerSpeed;
     }
 
@@ -952,6 +978,49 @@ function draw() {
   line(0, GROUND + player.h, width, GROUND + player.h);
   noStroke();
 
+  // ── Narrative screen ──────────────────────
+  if (state === "narrative") {
+    // Increment narrative timer
+    narrativeTimer++;
+
+    // Update player (standing still while world moves)
+    player.update(0, MAX_INTENSITY, platformManager.platforms, lvl);
+
+    // Move platforms at narrative speed
+    platformManager.update(2.0, lvl);
+
+    // Draw platforms (NO spikes)
+    platformManager.draw(lvl.platformColor);
+
+    // Draw player
+    player.draw(false, imgRun);
+
+    // Draw HUD
+    hud.draw(
+      0, // score
+      0, // intensity
+      MAX_INTENSITY,
+      hearts,
+      0, // streak
+      false, // boostActive
+      false, // shakeActive
+      0, // levelScore
+      lvl.dodgeGoal,
+      levelManager.currentIndex + 1,
+      levelManager.totalLevels,
+    );
+
+    // Draw narrative text (NO overlay)
+    drawNarrativeScreen();
+
+    // Check for transition
+    if (narrativeTimer > totalNarrativeTime) {
+      player.x = 90; // Reset player position
+      intensity = 0; // Reset intensity for smooth transition
+      state = "play";
+    }
+    return;
+  }
   // ══════════════════════════════════════════
   //  START SCREEN
   // ══════════════════════════════════════════
@@ -1303,6 +1372,40 @@ function updateAndDrawRain() {
   raindrops = raindrops.filter((d) => d.y < height);
 }
 
+// ── New narrative helpers ───────────────────
+function resetNarrative() {
+  narrativeTimer = 0;
+  totalNarrativeTime =
+    (narrativeLines.length - 1) * lineDelay + fadeDuration * 2;
+  layerOffsets = [0, 0, 0, 0, 0];
+}
+
+function getFadeAlpha(timer, startFrame, duration) {
+  let elapsed = timer - startFrame;
+  if (elapsed < 0) return 0;
+  if (elapsed < duration) return map(elapsed, 0, duration, 0, 255); // fade in
+  if (elapsed < duration * 2)
+    return map(elapsed, duration, duration * 2, 255, 0); // fade out
+  return 0;
+}
+
+function drawNarrativeScreen() {
+  textAlign(CENTER, CENTER);
+  fill(255, 220, 155);
+  textSize(32);
+  textStyle(BOLD);
+  text(narrativeCharacterName, width / 2, 60);
+
+  textSize(18);
+  textStyle(NORMAL);
+  for (let i = 0; i < narrativeLines.length; i++) {
+    let startFrame = i * lineDelay;
+    let alpha = getFadeAlpha(narrativeTimer, startFrame, fadeDuration);
+    fill(255, alpha);
+    text(narrativeLines[i], width / 2, 120 + i * 30);
+  }
+}
+
 // ── Collision: player hits a spike ───────────
 function checkCollision() {
   if (hitCooldown > 0) return;
@@ -1393,7 +1496,8 @@ function keyPressed() {
   if (state === "start") {
     if (keyCode === ENTER) {
       startScreen = "title";
-      state = "levelintro";
+      resetNarrative();
+      state = "narrative";
     }
     if (key === "i" || key === "I") startScreen = "instructions";
     if ((key === "b" || key === "B") && startScreen === "instructions") {
