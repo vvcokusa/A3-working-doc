@@ -17,7 +17,7 @@
 
   Collision logic lives in sketch.js.
 */
-
+/*
 class Spike {
   constructor(x, y, w, h, type = "ground") {
     this.x = x;
@@ -65,3 +65,4 @@ class Spike {
     }
   }
 }
+*/
