@@ -60,9 +60,10 @@ let startScreen = "title";
 let narrativeTimer = 0;
 let narrativeCharacterName = "Amaya";
 let narrativeLines = [
-  "Lorem ipsum dolor sit amet,",
-  "consectetur adipiscing elit,",
-  "sed do eiusmod tempor incididunt.",
+  "Amaya skates through a new city alone,",
+  "blending into the crowd like she's practiced a thousand times.",
+  "Running form something she can't quite name anymore...",
+  "But flowers have always been the one thing that make her mind stop.",
 ];
 let lineDelay = 300; // 5 seconds between line starts
 let fadeDuration = 150; // 2.5 seconds fade in, 2.5 seconds fade out
@@ -471,7 +472,6 @@ function resetNarrative() {
     (narrativeLines.length - 1) * lineDelay + fadeDuration * 2;
   bgX = 0;
 }
-
 
 function getFadeAlpha(timer, startFrame, duration) {
   let elapsed = timer - startFrame;
