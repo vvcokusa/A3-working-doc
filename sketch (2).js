@@ -912,6 +912,7 @@ function startNextLevel() {
     level2VisitCount++;
   }
 
+  hearts = 5;
   levelScore = 0;
   intensity = 0;
   streak = 0;
@@ -1310,11 +1311,25 @@ function draw() {
       return;
     }
 
+    // ── Player Drawing with Flicker ─────────────────
     push();
     if (shakeActive) translate(random(-4, 4), random(-4, 4));
+
     platformManager.draw(lvl.platformColor);
     spikeManager.draw(intensity, MAX_INTENSITY);
-    player.draw(boostActive, boostActive ? imgBoost : imgRun);
+
+    // If hitCooldown is active, only draw the player every 4th frame
+    // This creates the "flashing" or "blinking" effect
+    if (hitCooldown > 0) {
+      if (frameCount % 4 < 2) {
+        // Amaya is visible for 2 frames, invisible for 2 frames
+        player.draw(boostActive, boostActive ? imgBoost : imgRun);
+      }
+    } else {
+      // No hit cooldown? Draw her normally every frame
+      player.draw(boostActive, boostActive ? imgBoost : imgRun);
+    }
+
     pop();
 
     hud.draw(
@@ -1389,9 +1404,11 @@ function updateAndDrawBirds() {
     const overlapY = player.y + player.h > b.y + 4 && player.y < b.y + 28;
 
     if (overlapX && overlapY && hitCooldown <= 0) {
-      hearts = max(0, hearts - 1);
-      hitCooldown = 60;
-      if (hearts <= 0) state = "lose";
+      // 1. Remove the heart loss
+      // 2. Add these instead:
+      shakeActive = true;
+      shakeSuccess = 0;
+      hitCooldown = 60; // This makes her flicker so she doesn't get hit twice
     }
   }
 

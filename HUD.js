@@ -21,153 +21,150 @@ class HUD {
     streak,
     boostActive,
     shakeActive,
-    levelScore, // spikes dodged this level
-    dodgeGoal, // spikes needed to clear level
-    currentLevel, // 1-based display number
+    levelScore,
+    dodgeGoal,
+    currentLevel,
     totalLevels,
   ) {
-    // ── Score ────────────────────────────────
-    fill(0);
+    // ── UI Setup ─────────────────────────────
+    rectMode(CORNER);
     noStroke();
+
+    // ── Top Left Panel (Score & Hearts) ──────
+    // Subtle "Glass" background
+    fill(0, 0, 0, 60);
+    rect(5, 5, 180, 75, 8);
+
+    // Score
+    fill(255);
     textAlign(LEFT);
     textSize(14);
-    text("Score: " + score, 10, 20);
+    textStyle(BOLD);
+    text("SCORE: " + score, 15, 25);
 
-    // ── Hearts display ───────────────────────
-    textAlign(CENTER);
-    textSize(28);
-
+    // Hearts (Pixelated)
     for (let i = 0; i < 5; i++) {
-      if (i < hearts) {
-        fill(255, 50, 50);
-      } else {
-        fill(100);
-      }
-      text("♥", 22 + i * 35, 55);
+      let x = 15 + i * 32;
+      let y = 38;
+      let isFull = i < hearts;
+      this.drawPixelHeart(x, y, isFull);
     }
 
-    textSize(14);
-    textAlign(LEFT);
-
-    // ── Mania Meter ──────────────────────────
-    const meterX = 10;
-    const meterY = 68;
+    // ── Mania Meter (Streak) ──────────────────
+    const meterX = 15;
+    const meterY = 62;
     const meterW = 160;
-    const meterH = 14;
-    const meterRadius = 4;
+    const meterH = 10;
 
-    noStroke();
-    textSize(11);
-
-    // Track background
-    fill(60);
-    rect(meterX, meterY, meterW, meterH, meterRadius);
+    // Track
+    fill(40, 40, 40, 180);
+    rect(meterX, meterY, meterW, meterH, 4);
 
     if (shakeActive) {
-      // Shaking mode: red pulsing bar (full)
-      const pulse = 0.6 + 0.4 * sin(frameCount * 0.2);
-      fill(255 * pulse, 30, 30);
-      rect(meterX, meterY, meterW, meterH, meterRadius);
-
-      // Danger label
-      fill(255, 60, 60);
-      textSize(11);
-      textAlign(LEFT);
-      text("DANGER — clear 5 spikes to recover!", meterX, meterY + meterH + 13);
+      // DANGER MODE
+      const pulse = 0.5 + 0.5 * sin(frameCount * 0.2);
+      fill(255 * pulse, 50, 50);
+      rect(meterX, meterY, meterW, meterH, 4);
     } else if (boostActive) {
-      // Boost mode: full golden bar with shimmer
-      const shimmer = 0.85 + 0.15 * sin(frameCount * 0.3);
-      fill(255 * shimmer, 200 * shimmer, 0);
-      rect(meterX, meterY, meterW, meterH, meterRadius);
-
-      // Shine highlight
-      fill(255, 255, 180, 120);
-      rect(meterX + 4, meterY + 2, meterW - 8, 4, 2);
-
-      // No small label — replaced by the big centered banner below
-
-      // ── Centered BOOST ACTIVE! banner ────────
-      push();
-
-      // Flash: alternates fully visible and semi-transparent
-      const flashAlpha = map(sin(frameCount * 0.18), -1, 1, 140, 255);
-
-      // Subtle dark pill behind the text for readability
-      const bannerW = 320;
-      const bannerH = 58;
-      const bannerX = width / 2;
-      const bannerY = height / 2 - 30;
-
-      noStroke();
-      fill(20, 10, 0, flashAlpha * 0.55);
-      rectMode(CENTER);
-      rect(bannerX, bannerY, bannerW, bannerH, 12);
-
-      // Golden glow outline
-      const glowPulse = 0.5 + 0.5 * sin(frameCount * 0.18);
-      stroke(255, 200, 0, 180 * glowPulse);
-      strokeWeight(2.5);
-      noFill();
-      rect(bannerX, bannerY, bannerW, bannerH, 12);
-
-      // Main text — bold & large
-      noStroke();
-      fill(255, 220, 0, flashAlpha);
-      textAlign(CENTER, CENTER);
-      textStyle(BOLD);
-      textSize(36);
-      text("BOOST ACTIVE", bannerX, bannerY);
-
-      pop();
+      // BOOST MODE
+      fill(255, 215, 0);
+      rect(meterX, meterY, meterW, meterH, 4);
     } else {
-      // Normal: green fill based on streak (0–5)
+      // NORMAL MODE
       const fillW = map(streak, 0, 5, 0, meterW);
-      fill(60, 200, 80);
-      if (fillW > 0) rect(meterX, meterY, fillW, meterH, meterRadius);
-
-      // Segment markers (4 lines dividing into 5 segments)
-      stroke(30);
-      strokeWeight(1);
-      for (let i = 1; i < 5; i++) {
-        const markerX = meterX + (meterW / 5) * i;
-        line(markerX, meterY, markerX, meterY + meterH);
-      }
-      noStroke();
-
-      // Status label
-      fill(80);
-      textSize(11);
-      textAlign(LEFT);
-      text(streak + " / 5 — dodge 5 for boost", meterX, meterY + meterH + 13);
+      fill(0, 255, 150);
+      if (fillW > 0) rect(meterX, meterY, fillW, meterH, 4);
     }
 
-    // ── Level name (top-right) ───────────────
+    // ── Top Right Panel (Level Progress) ──────
+    fill(0, 0, 0, 60);
+    rect(width - 175, 5, 170, 60, 8);
+
     textAlign(RIGHT);
-    fill(0);
-    textSize(13);
-    text("Level " + currentLevel + " / " + totalLevels, width - 10, 20);
+    fill(255);
+    textSize(12);
+    text("LEVEL " + currentLevel + " / " + totalLevels, width - 15, 22);
 
-    // ── Level progress bar ───────────────────
-    const barW = 160;
-    const barH = 10;
-    const barX = width - barW - 10;
-    const barY = 28;
+    // Progress Bar
+    const barW = 150;
+    const barH = 8;
+    const barX = width - barW - 15;
+    const barY = 30;
 
-    fill(200);
-    noStroke();
-    rect(barX, barY, barW, barH, 3);
+    fill(40, 40, 40, 180);
+    rect(barX, barY, barW, barH, 4);
 
     const progress = constrain(levelScore / dodgeGoal, 0, 1);
-    fill(80, 200, 100);
-    rect(barX, barY, barW * progress, barH, 3);
+    fill(100, 255, 100);
+    rect(barX, barY, barW * progress, barH, 4);
 
-    textAlign(RIGHT);
-    fill(0);
-    textSize(11);
-    text(levelScore + " / " + dodgeGoal + " spikes", width - 10, 50);
+    fill(200);
+    textSize(10);
+    text(levelScore + " / " + dodgeGoal + " SPIKES", width - 15, 52);
 
-    textAlign(LEFT); // reset
-    textStyle(NORMAL); // reset
-    rectMode(CORNER); // reset
+    // ── Centered Boost Banner ────────────────
+    if (boostActive) {
+      this.drawBoostBanner();
+    }
+
+    // Reset styles for rest of game
+    textStyle(NORMAL);
+    textAlign(LEFT);
+  }
+
+  // Helper to draw a pixel-art heart manually
+  drawPixelHeart(x, y, full) {
+    push();
+    translate(x, y);
+    let pSize = 3; // Size of each "pixel" square
+
+    if (full) {
+      fill(255, 50, 80); // Bright Red
+    } else {
+      fill(60, 60, 60, 150); // Ghostly Grey
+    }
+
+    noStroke();
+    // Simple pixel heart coordinates (relative to x,y)
+    // Top bumps
+    rect(pSize, 0, pSize, pSize);
+    rect(pSize * 2, 0, pSize, pSize);
+    rect(pSize * 4, 0, pSize, pSize);
+    rect(pSize * 5, 0, pSize, pSize);
+    // Middle row
+    rect(0, pSize, pSize * 7, pSize);
+    // Lower rows tapering down
+    rect(0, pSize * 2, pSize * 7, pSize);
+    rect(pSize, pSize * 3, pSize * 5, pSize);
+    rect(pSize * 2, pSize * 4, pSize * 3, pSize);
+    rect(pSize * 3, pSize * 5, pSize, pSize);
+    pop();
+  }
+
+  drawBoostBanner() {
+    push();
+    const flash = 180 + 75 * sin(frameCount * 0.15);
+    const bannerX = width / 2;
+    const bannerY = height / 2 - 40;
+
+    rectMode(CENTER);
+    // Main dark pill
+    fill(0, 0, 0, 150);
+    rect(bannerX, bannerY, 280, 50, 10);
+
+    // Golden border
+    stroke(255, 215, 0, flash);
+    strokeWeight(3);
+    noFill();
+    rect(bannerX, bannerY, 280, 50, 10);
+
+    // Text
+    noStroke();
+    textAlign(CENTER, CENTER);
+    fill(255, 215, 0, flash);
+    textSize(32);
+    textStyle(BOLD);
+    text("BOOST ACTIVE!", bannerX, bannerY);
+    pop();
   }
 }
