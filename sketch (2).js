@@ -791,8 +791,10 @@ let allBgLayers = [[], [], []]; // one array of images per level
 let layerOffsets = []; // scrollX per layer
 let imgIdle;
 let imgRun;
+let imgBird;
 let imgBoost;
 let raindrops = [];
+let birds = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -851,6 +853,7 @@ function preload() {
   imgIdle = loadImage("assets/standing-skin.gif");
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
+  imgBird = loadImage("assets/birdfly.png");
 }
 
 // ── p5 setup ─────────────────────────────────
@@ -894,6 +897,7 @@ function resetGame() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
 
   startScreen = "title";
 }
@@ -921,6 +925,7 @@ function startNextLevel() {
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
+  birds = [];
 }
 
 // ── Main draw loop ────────────────────────────
@@ -1279,9 +1284,25 @@ function draw() {
       levelOneSecondPlatformSpikeSpawned = true;
     }
 
+    // ── Birds (level 2 only) ──────────────
+    if (levelManager.currentIndex === 1) {
+      if (frameCount % floor(random(180, 300)) === 0) {
+        spawnBird();
+      }
+      updateAndDrawBirds();
+    }
+
     checkNearMiss();
     checkScore();
     checkCollision();
+
+    if (levelManager.currentIndex === 1) {
+      // Level 2 check
+      if (frameCount % floor(random(180, 300)) === 0) {
+        spawnBird();
+      }
+      updateAndDrawBirds();
+    }
 
     if (levelScore >= lvl.dodgeGoal) {
       state = "levelclear";
@@ -1332,6 +1353,49 @@ function draw() {
       height / 2 + 22,
     );
   }
+}
+// ── Bird spawning ─────────────────────────────
+function spawnBird() {
+  birds.push({
+    x: width + 50,
+    y: random(30, 160),
+    speed: random(4, 6),
+    frame: 0,
+    frameTimer: 0,
+    frameRate: 6,
+  });
+}
+
+// ── Bird update + draw ────────────────────────
+function updateAndDrawBirds() {
+  for (let b of birds) {
+    b.frameTimer++;
+    if (b.frameTimer >= b.frameRate) {
+      b.frame = (b.frame + 1) % 6;
+      b.frameTimer = 0;
+    }
+
+    b.x -= b.speed;
+
+    let sx = b.frame * 32;
+    push(); // Save the current coordinate state
+    translate(b.x + 32, b.y); // Move to the bird's position (+ width to account for flip)
+    scale(-1, 1); // Flip horizontally
+    // Draw at (0,0) because we translated the origin
+    image(imgBird, 0, 0, 32, 32, sx, 0, 32, 32);
+    pop(); // Restore state so nothing else is flipped
+
+    const overlapX = player.x + player.w > b.x + 4 && player.x < b.x + 28;
+    const overlapY = player.y + player.h > b.y + 4 && player.y < b.y + 28;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      hearts = max(0, hearts - 1);
+      hitCooldown = 60;
+      if (hearts <= 0) state = "lose";
+    }
+  }
+
+  birds = birds.filter((b) => b.x > -50);
 }
 
 // ── Advance to next level or trigger win ─────
