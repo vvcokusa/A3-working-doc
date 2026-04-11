@@ -1403,12 +1403,19 @@ function updateAndDrawBirds() {
     const overlapX = player.x + player.w > b.x + 4 && player.x < b.x + 28;
     const overlapY = player.y + player.h > b.y + 4 && player.y < b.y + 28;
 
+    // --- Inside updateAndDrawBirds ---
     if (overlapX && overlapY && hitCooldown <= 0) {
-      // 1. Remove the heart loss
-      // 2. Add these instead:
-      shakeActive = true;
-      shakeSuccess = 0;
-      hitCooldown = 60; // This makes her flicker so she doesn't get hit twice
+      if (shakeActive) {
+        // SCENARIO 2: Already shaking? Lose a heart!
+        hearts = max(0, hearts - 1);
+        hitCooldown = 60; // Brief invincibility flicker
+        if (hearts <= 0) state = "lose";
+      } else if (!boostActive) {
+        // SCENARIO 1: Normal state? Trigger Shake Mode
+        shakeActive = true;
+        shakeSuccess = 0;
+        hitCooldown = 60; // Brief invincibility flicker
+      }
     }
   }
 
