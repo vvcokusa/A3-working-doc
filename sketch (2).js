@@ -815,6 +815,11 @@ let level2VisitCount = 0;
 let boostActive = false;
 let boostTimer = 0;
 
+// ── Sound variables ──────────────────────────
+let soundJump;
+let soundDamage;
+let soundBoost;
+
 let hearts = 5;
 let hitCooldown = 0;
 
@@ -854,6 +859,11 @@ function preload() {
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
   imgBird = loadImage("assets/birdfly.png");
+
+  // Load sounds
+  soundJump = loadSound("assets/jump.mp3");
+  soundDamage = loadSound("assets/damage.mp3");
+  soundBoost = loadSound("assets/boost.mp3");
 }
 
 // ── p5 setup ─────────────────────────────────
@@ -1409,6 +1419,10 @@ function updateAndDrawBirds() {
         // SCENARIO 2: Already shaking? Lose a heart!
         hearts = max(0, hearts - 1);
         hitCooldown = 60; // Brief invincibility flicker
+        
+        // Play damage sound when losing hearts
+        if (soundDamage) soundDamage.play();
+
         if (hearts <= 0) state = "lose";
       } else if (!boostActive) {
         // SCENARIO 1: Normal state? Trigger Shake Mode
@@ -1519,6 +1533,10 @@ function checkCollision() {
 
       if (shakeActive) {
         hearts = max(0, hearts - 1);
+
+        // Play damage sound when losing hearts
+        if (soundDamage) soundDamage.play();
+
         if (hearts <= 0) {
           state = "lose";
           return;
@@ -1559,6 +1577,10 @@ function checkScore() {
           boostActive = true;
           boostTimer = BOOST_DURATION;
           streak = 0;
+
+          // Play boost sound
+          if (soundBoost) soundBoost.play();
+
         }
       }
     }
@@ -1604,6 +1626,9 @@ function keyPressed() {
 
   if (state === "play" && key === " ") {
     player.jump(boostActive);
+
+      // Play jump sound
+    if (soundJump) soundJump.play();
   }
 
   if (
