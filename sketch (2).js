@@ -1278,24 +1278,24 @@ function draw() {
       lvl.baseSpeed + map(intensity, 0, MAX_INTENSITY, 0, lvl.maxSpeedBonus);
     if (shakeActive) gameSpeed *= 1.25;
 
-    /*player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+    player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
-    platformManager.update(gameSpeed, lvl);*/
+    platformManager.update(gameSpeed, lvl);
 
 
     //spike stuff ^ 
-    player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+   /* player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     if (levelManager.currentIndex === 2) {
       spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
     } else {
       spikeManager.spikes = [];
-    }
+    }*/
 
 platformManager.update(gameSpeed, lvl);
 
 
 //Spike stuff
-    /*if (
+    if (
       lvl.name === "Level 1 — Fractured Skylines" &&
       !levelOneSecondPlatformSpikeSpawned &&
       platformManager.platforms.length >= 2
@@ -1306,7 +1306,7 @@ platformManager.update(gameSpeed, lvl);
       const spikeX = targetPlatform.x + targetPlatform.w / 2 - spikeW / 2;
       spikeManager.spawnAirSpikeAt(spikeX, AIR_SPIKE_Y, spikeW, spikeH);
       levelOneSecondPlatformSpikeSpawned = true;
-    }*/
+    }
 
     // ── Birds (level 2 only) ──────────────
     if (levelManager.currentIndex === 1) {
@@ -1339,14 +1339,14 @@ platformManager.update(gameSpeed, lvl);
     if (shakeActive) translate(random(-4, 4), random(-4, 4));
 
     //Spike stuff
-    /*platformManager.draw(lvl.platformColor);
-    spikeManager.draw(intensity, MAX_INTENSITY);*/
+    platformManager.draw(lvl.platformColor);
+    spikeManager.draw(intensity, MAX_INTENSITY);
 
     //Spike stuff ^
-    platformManager.draw(lvl.platformColor);
+    /*platformManager.draw(lvl.platformColor);
     if (levelManager.currentIndex === 2) {
       spikeManager.draw(intensity, MAX_INTENSITY);
-    }
+    }*/
 
     // If hitCooldown is active, only draw the player every 4th frame
     // This creates the "flashing" or "blinking" effect
