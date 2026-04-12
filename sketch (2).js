@@ -809,6 +809,8 @@ let spikeManager;
 let platformManager;
 let hud;
 let levelManager;
+let cutscene;
+let cutscene2;
 
 let score = 0;
 let levelScore = 0;
@@ -882,6 +884,8 @@ function setup() {
   spikeManager = new SpikeManager();
   platformManager = new PlatformManager();
   hud = new HUD();
+  cutscene = new Cutscene();
+  cutscene2 = new Cutscene2();
 
   resetGame();
 }
@@ -1205,6 +1209,32 @@ function draw() {
   }
 
   // ══════════════════════════════════════════
+  //  CUTSCENE 2 — sky to cave (after Level 2)
+  // ══════════════════════════════════════════
+  if (state === "cutscene2") {
+    cutscene2.update();
+    cutscene2.draw(allBgLayers[2]);
+    if (cutscene2.isDone()) {
+      state = "levelclear";
+      levelClearTimer = 180;
+    }
+    return;
+  }
+
+  // ══════════════════════════════════════════
+  //  CUTSCENE (after Level 1 clears) ← NEW
+  // ══════════════════════════════════════════
+  if (state === "cutscene") {
+    cutscene.update();
+    cutscene.draw();
+    if (cutscene.isDone()) {
+      state = "levelclear";
+      levelClearTimer = 180;
+    }
+    return;
+  }
+
+  // ══════════════════════════════════════════
   //  LEVEL CLEAR SCREEN
   // ══════════════════════════════════════════
   if (state === "levelclear") {
@@ -1290,7 +1320,7 @@ function draw() {
     platformManager.update(gameSpeed, lvl);*/
 
     //spike stuff ^
-     player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+    player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     if (levelManager.currentIndex === 2) {
       spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
     } else {
@@ -1313,14 +1343,13 @@ function draw() {
       levelOneSecondPlatformSpikeSpawned = true;
     }*/
 
-
     // -- Car spawning (level 1 only) --
     if (levelManager.currentIndex === 0) {
-  if (frameCount % floor(random(120, 190)) === 0) {
-    spawnCar();
-  }
-  updateAndDrawCars();
-}
+      if (frameCount % floor(random(120, 190)) === 0) {
+        spawnCar();
+      }
+      updateAndDrawCars();
+    }
 
     // ── Birds (level 2 only) ──────────────
     if (levelManager.currentIndex === 1) {
@@ -1352,8 +1381,16 @@ function draw() {
     }
 
     if (levelScore >= lvl.dodgeGoal) {
-      state = "levelclear";
-      levelClearTimer = 180;
+      if (levelManager.currentIndex === 0) {
+        cutscene.start();
+        state = "cutscene";
+      } else if (levelManager.currentIndex === 1) {
+        cutscene2.start();
+        state = "cutscene2";
+      } else {
+        state = "levelclear";
+        levelClearTimer = 180;
+      }
       return;
     }
 
@@ -1527,7 +1564,6 @@ function updateAndDrawBirds() {
   birds = birds.filter((b) => b.x > -50);
 }
 
-
 // ── Car spawning (level 1 only) ─────────────
 function spawnCar() {
   cars.push({
@@ -1595,7 +1631,6 @@ function updateAndDrawCars() {
 
   cars = cars.filter((c) => c.x + c.w > 0);
 }
-
 
 // ── Advance to next level or trigger win ─────
 function advanceLevel() {
@@ -1782,6 +1817,11 @@ function keyPressed() {
 
   if (state === "levelclear" && keyCode === ENTER) {
     advanceLevel();
+  }
+
+  if ((state === "cutscene" || state === "cutscene2") && keyCode === ENTER) {
+    if (state === "cutscene") cutscene.skip();
+    else cutscene2.skip();
   }
 
   if (state === "play" && key === " ") {
