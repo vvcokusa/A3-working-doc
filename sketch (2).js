@@ -794,9 +794,11 @@ let imgRun;
 let imgBird;
 let imgBat;
 let imgBoost;
+let imgCar;
 let raindrops = [];
 let birds = [];
 let bats = [];
+let cars = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -862,6 +864,7 @@ function preload() {
   imgBoost = loadImage("assets/booster-skin.gif");
   imgBird = loadImage("assets/birdfly.png");
   imgBat = loadImage("assets/bat2.png");
+  imgCar = loadImage("assets/car.png");
 
   // Load sounds
   soundJump = loadSound("assets/jump.mp3");
@@ -1282,22 +1285,22 @@ function draw() {
       lvl.baseSpeed + map(intensity, 0, MAX_INTENSITY, 0, lvl.maxSpeedBonus);
     if (shakeActive) gameSpeed *= 1.25;
 
-    player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+    /*player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
-    platformManager.update(gameSpeed, lvl);
+    platformManager.update(gameSpeed, lvl);*/
 
     //spike stuff ^
-    /* player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+     player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     if (levelManager.currentIndex === 2) {
       spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
     } else {
       spikeManager.spikes = [];
-    }*/
+    }
 
     platformManager.update(gameSpeed, lvl);
 
     //Spike stuff
-    if (
+    /*if (
       lvl.name === "Level 1 — Fractured Skylines" &&
       !levelOneSecondPlatformSpikeSpawned &&
       platformManager.platforms.length >= 2
@@ -1308,7 +1311,16 @@ function draw() {
       const spikeX = targetPlatform.x + targetPlatform.w / 2 - spikeW / 2;
       spikeManager.spawnAirSpikeAt(spikeX, AIR_SPIKE_Y, spikeW, spikeH);
       levelOneSecondPlatformSpikeSpawned = true;
-    }
+    }*/
+
+
+    // -- Car spawning (level 1 only) --
+    if (levelManager.currentIndex === 0) {
+  if (frameCount % floor(random(120, 190)) === 0) {
+    spawnCar();
+  }
+  updateAndDrawCars();
+}
 
     // ── Birds (level 2 only) ──────────────
     if (levelManager.currentIndex === 1) {
@@ -1350,14 +1362,14 @@ function draw() {
     if (shakeActive) translate(random(-4, 4), random(-4, 4));
 
     //Spike stuff
-    platformManager.draw(lvl.platformColor);
-    spikeManager.draw(intensity, MAX_INTENSITY);
+    /*platformManager.draw(lvl.platformColor);
+    spikeManager.draw(intensity, MAX_INTENSITY);*/
 
     //Spike stuff ^
-    /*platformManager.draw(lvl.platformColor);
+    platformManager.draw(lvl.platformColor);
     if (levelManager.currentIndex === 2) {
       spikeManager.draw(intensity, MAX_INTENSITY);
-    }*/
+    }
 
     // If hitCooldown is active, only draw the player every 4th frame
     // This creates the "flashing" or "blinking" effect
@@ -1514,6 +1526,76 @@ function updateAndDrawBirds() {
 
   birds = birds.filter((b) => b.x > -50);
 }
+
+
+// ── Car spawning (level 1 only) ─────────────
+function spawnCar() {
+  cars.push({
+    x: width + 60,
+    y: GROUND,
+    w: 90,
+    h: 36,
+    speed: random(5, 8),
+    scored: false,
+  });
+}
+
+function updateAndDrawCars() {
+  for (let c of cars) {
+    c.x -= c.speed;
+
+    if (imgCar) {
+      image(imgCar, c.x, c.y, c.w, c.h);
+    } else {
+      fill(40, 80, 180);
+      rect(c.x, c.y, c.w, c.h, 6);
+    }
+
+    const overlapX = player.x + player.w > c.x + 8 && player.x < c.x + c.w - 8;
+    const overlapY = player.y + player.h > c.y + 6 && player.y < c.y + c.h - 4;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      if (shakeActive) {
+        hearts = max(0, hearts - 1);
+        hitCooldown = 60;
+        if (soundDamage) soundDamage.play();
+        if (hearts <= 0) state = "lose";
+      } else if (!boostActive) {
+        shakeActive = true;
+        shakeSuccess = 0;
+        hitCooldown = 60;
+      }
+    }
+
+    if (!c.scored && c.x + c.w < player.x) {
+      c.scored = true;
+      score++;
+      levelScore++;
+
+      if (shakeActive) {
+        shakeSuccess++;
+        if (shakeSuccess >= 5) {
+          shakeActive = false;
+          shakeSuccess = 0;
+          misses = 0;
+        }
+      }
+
+      if (!shakeActive && !boostActive) {
+        streak++;
+        if (streak >= 5) {
+          boostActive = true;
+          boostTimer = BOOST_DURATION;
+          streak = 0;
+          if (soundBoost) soundBoost.play();
+        }
+      }
+    }
+  }
+
+  cars = cars.filter((c) => c.x + c.w > 0);
+}
+
 
 // ── Advance to next level or trigger win ─────
 function advanceLevel() {
