@@ -792,9 +792,11 @@ let layerOffsets = []; // scrollX per layer
 let imgIdle;
 let imgRun;
 let imgBird;
+let imgBat;
 let imgBoost;
 let raindrops = [];
 let birds = [];
+let bats = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -859,6 +861,7 @@ function preload() {
   imgRun = loadImage("assets/running-skin.gif");
   imgBoost = loadImage("assets/booster-skin.gif");
   imgBird = loadImage("assets/birdfly.png");
+  imgBat = loadImage("assets/bat2.png");
 
   // Load sounds
   soundJump = loadSound("assets/jump.mp3");
@@ -937,6 +940,7 @@ function startNextLevel() {
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
   birds = [];
+  bats = [];
 }
 
 // ── Main draw loop ────────────────────────────
@@ -1282,19 +1286,17 @@ function draw() {
     spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
     platformManager.update(gameSpeed, lvl);
 
-
-    //spike stuff ^ 
-   /* player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
+    //spike stuff ^
+    /* player.update(intensity, MAX_INTENSITY, platformManager.platforms, lvl);
     if (levelManager.currentIndex === 2) {
       spikeManager.update(gameSpeed, intensity, MAX_INTENSITY, lvl);
     } else {
       spikeManager.spikes = [];
     }*/
 
-platformManager.update(gameSpeed, lvl);
+    platformManager.update(gameSpeed, lvl);
 
-
-//Spike stuff
+    //Spike stuff
     if (
       lvl.name === "Level 1 — Fractured Skylines" &&
       !levelOneSecondPlatformSpikeSpawned &&
@@ -1314,6 +1316,15 @@ platformManager.update(gameSpeed, lvl);
         spawnBird();
       }
       updateAndDrawBirds();
+    }
+
+    // Bats (level 3 only)
+    if (levelManager.currentIndex === 2) {
+      // Spawns a bat roughly every 2-3 seconds
+      if (frameCount % floor(random(120, 200)) === 0) {
+        spawnBat();
+      }
+      updateAndDrawBats();
     }
 
     checkNearMiss();
@@ -1399,6 +1410,54 @@ platformManager.update(gameSpeed, lvl);
     );
   }
 }
+// Bat Spawning
+function spawnBat() {
+  bats.push({
+    x: width + 50,
+    y: random(30, 150),
+    speed: random(5, 8),
+    frame: 0,
+    frameTimer: 0,
+    frameRate: 6, // Flap speed
+  });
+}
+
+function updateAndDrawBats() {
+  for (let b of bats) {
+    // 1. Animation Cycle
+    b.frameTimer++;
+    if (b.frameTimer >= b.frameRate) {
+      b.frame = (b.frame + 1) % 5;
+      b.frameTimer = 0;
+    }
+
+    b.x -= b.speed;
+    let wobble = sin(frameCount * 0.1) * 3;
+
+    // 2. Draw
+    let sx = b.frame * 30;
+    image(imgBat, b.x, b.y + wobble, 30, 30, sx, 0, 30, 30);
+
+    // 3. Complete Collision Logic
+    const overlapX = player.x + player.w > b.x + 5 && player.x < b.x + 25;
+    const overlapY = player.y + player.h > b.y + 5 && player.y < b.y + 25;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      if (shakeActive) {
+        hearts = max(0, hearts - 1);
+        hitCooldown = 60;
+        if (soundDamage) soundDamage.play();
+        if (hearts <= 0) state = "lose";
+      } else if (!boostActive) {
+        shakeActive = true;
+        shakeSuccess = 0;
+        hitCooldown = 60;
+      }
+    }
+  }
+  bats = bats.filter((b) => b.x > -50);
+}
+
 // ── Bird spawning ─────────────────────────────
 function spawnBird() {
   birds.push({
@@ -1439,7 +1498,7 @@ function updateAndDrawBirds() {
         // SCENARIO 2: Already shaking? Lose a heart!
         hearts = max(0, hearts - 1);
         hitCooldown = 60; // Brief invincibility flicker
-        
+
         // Play damage sound when losing hearts
         if (soundDamage) soundDamage.play();
 
@@ -1600,7 +1659,6 @@ function checkScore() {
 
           // Play boost sound
           if (soundBoost) soundBoost.play();
-
         }
       }
     }
@@ -1647,7 +1705,7 @@ function keyPressed() {
   if (state === "play" && key === " ") {
     player.jump(boostActive);
 
-      // Play jump sound
+    // Play jump sound
     if (soundJump) soundJump.play();
   }
 
