@@ -1,20 +1,9 @@
-<!--
-  index.html
-  ─────────────────────────────────────────────
-  Main entry point for the A2 Mid-Term Game.
-
-  Script load order (important):
-    1. p5.js library
-    2. Game classes (Player, Spike, etc.)
-    3. LevelManager.js  ← new — defines all level configs
-    4. Main sketch.js (uses classes + globals)
--->
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>A2 Mid-Term Game Prototype</title>
+    <title>Between Floor</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -22,11 +11,11 @@
       <!-- p5 injects the canvas here -->
     </main>
 
-    <!-- p5.js library -->
+    <!-- p5.js + sound addon -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/addons/p5.sound.min.js"></script>
 
-    <!-- Game classes — load BEFORE sketch.js -->
+    <!-- Game classes — load BEFORE sketch -->
     <script src="Player.js"></script>
     <script src="Spike.js"></script>
     <script src="SpikeManager.js"></script>
@@ -35,8 +24,11 @@
     <script src="HUD.js"></script>
     <script src="LevelManager.js"></script>
 
-    <!-- Main sketch last -->
+    <!-- Cutscenes — load BEFORE sketch -->
+    <script src="Cutscene.js"></script>
+    <script src="Cutscene2.js"></script>
+
+    <!-- Main sketch — always last -->
     <script src="sketch (2).js"></script>
-    <script src="sketch.js"></script>
   </body>
 </html>
