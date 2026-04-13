@@ -657,15 +657,23 @@ class PlatformManager {
     const spawnX = width + 40;
     const w = 200;
 
-    if (isLevelOne) {
-    const behavior = "solid";
+      if (isLevelOne) {
+      const behavior = "solid";
       if (this._overlaps(spawnX, w)) {
         this._resetSpawnTimer();
         return;
       }
-      this.platforms.push(
-        new Platform(spawnX, PLATFORM_Y, w, 14, behavior, "scaffolding"),
-      );
+
+      const p = new Platform(spawnX, PLATFORM_Y, w, 14, behavior, "scaffolding");
+
+      p.hasGarbage = random() < 0.75;
+      p.garbageOffsetX = random(20, w - 70);
+
+      // bigger garbage hitbox
+      p.garbageW = 46;
+      p.garbageH = 46;
+
+      this.platforms.push(p);
     } else if (isLevelThree) {
       // 50% scaffolding / 50% double_scaffolding on Level 3
       const spriteMode = random() < 0.5 ? "scaffolding" : "double_scaffolding";
@@ -692,11 +700,17 @@ class PlatformManager {
   }
 
   // ── Draw ─────────────────────────────────────
-  draw(platformColor, imgScaffold, imgDoubleScaffold, imgCloud) {
-    for (const p of this.platforms) {
-      p.draw(platformColor, imgScaffold, imgDoubleScaffold, imgCloud);
-    }
+  draw(platformColor, imgScaffold, imgDoubleScaffold, imgCloud, imgGarbage) {
+  for (const p of this.platforms) {
+    p.draw(
+      platformColor,
+      imgScaffold,
+      imgDoubleScaffold,
+      imgCloud,
+      imgGarbage
+    );
   }
+}
 
   // ── Overlap guard ─────────────────────────────
   _overlaps(spawnX, w, minGap = 60, layer = null) {

@@ -72,13 +72,14 @@ class Platform {
   }
 
   // colOverride — optional [r,g,b] array from PlatformManager / level config
-  draw(colOverride, imgScaffold, imgDoubleScaffold, imgCloud) {
+  draw(colOverride, imgScaffold, imgDoubleScaffold, imgCloud, imgGarbage) {
   console.log(
     "DRAW TEST",
     this.spriteMode,
     !!imgScaffold,
     !!imgDoubleScaffold,
-    !!imgCloud
+    !!imgCloud,
+    !!imgGarbage
   );
 
   const [r, g, b] = colOverride || [222, 153, 182];
@@ -92,6 +93,16 @@ class Platform {
 
   if (this.spriteMode === "scaffolding" && imgScaffold) {
   image(imgScaffold, this.x, this.y + 10, this.w, 80);
+
+  if (this.hasGarbage && imgGarbage) {
+    image(
+      imgGarbage,
+      this.x + this.garbageOffsetX,
+      this.y - 24,
+      56,
+      56
+    );
+  }
 } else if (
   this.spriteMode === "double_scaffolding" &&
   imgDoubleScaffold
