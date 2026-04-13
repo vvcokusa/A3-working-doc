@@ -526,8 +526,7 @@ function draw() {
     cutscene2.update();
     cutscene2.draw(allBgLayers[2]);
     if (cutscene2.isDone()) {
-      state = "levelclear";
-      levelClearTimer = 180;
+      advanceLevel();
     }
     return;
   }
@@ -539,8 +538,7 @@ function draw() {
     cutscene.update();
     cutscene.draw();
     if (cutscene.isDone()) {
-      state = "levelclear";
-      levelClearTimer = 180;
+      advanceLevel();
     }
     return;
   }
