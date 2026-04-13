@@ -58,7 +58,7 @@
 */
 
 class Platform {
-  constructor(x, y, w, h, behavior = null) {
+  constructor(x, y, w, h, behavior = null, spriteMode = "rect") {
     this.x = x;
     this.y = y;
     this.w = w;
@@ -68,21 +68,70 @@ class Platform {
     this.dissolveTimer = null;
     this.dissolveDuration = null;
     this.behavior = behavior || "fade_respawn";
+    this.spriteMode = spriteMode;
   }
 
   // colOverride — optional [r,g,b] array from PlatformManager / level config
-  draw(colOverride) {
-    const [r, g, b] = colOverride || [222, 153, 182]; // default pink
-    const alpha =
-      this.dissolveTimer != null
-        ? map(this.dissolveTimer, 0, this.dissolveDuration, 0, 255)
-        : this.alpha;
-    fill(r, g, b, alpha);
+  draw(colOverride, imgScaffold, imgDoubleScaffold, imgCloud) {
+  console.log(
+    "DRAW TEST",
+    this.spriteMode,
+    !!imgScaffold,
+    !!imgDoubleScaffold,
+    !!imgCloud
+  );
+
+  const [r, g, b] = colOverride || [222, 153, 182];
+  const alpha =
+    this.dissolveTimer != null
+      ? map(this.dissolveTimer, 0, this.dissolveDuration, 0, 255)
+      : this.alpha;
+
+  push();
+  tint(255, alpha);
+
+  if (this.spriteMode === "scaffolding" && imgScaffold) {
+  image(imgScaffold, this.x, this.y + 10, this.w, 80);
+} else if (
+  this.spriteMode === "double_scaffolding" &&
+  imgDoubleScaffold
+) {
+  image(imgDoubleScaffold, this.x, this.y - 4, this.w, 140);
+} else if (
+  (this.spriteMode === "cloud" || this.spriteMode === "cloud_floor") &&
+  imgCloud
+) {
+  const SRC_X = 0;
+  const SRC_Y = 49;
+  const SRC_W = 80;
+  const SRC_H = 79;
+  const VISUAL_H = 20;
+
+  let drawn = 0;
+  while (drawn < this.w) {
+    const pieceW = min(SRC_W, this.w - drawn);
+    image(
+      imgCloud,
+      this.x + drawn,
+      this.y,
+      pieceW,
+      VISUAL_H,
+      SRC_X,
+      SRC_Y,
+      SRC_W,
+      SRC_H
+    );
+    drawn += pieceW;
+  }
+} else {
     noStroke();
+    fill(r, g, b, alpha);
     rect(this.x, this.y, this.w, this.h, 4);
 
-    // Subtle top highlight
     fill(min(r + 30, 255), min(g + 30, 255), min(b + 30, 255), alpha);
     rect(this.x + 4, this.y, this.w - 8, 3, 2);
   }
+
+  pop();
+}
 }

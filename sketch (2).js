@@ -795,6 +795,9 @@ let imgBird;
 let imgBat;
 let imgBoost;
 let imgCar;
+let imgScaffolding;
+let imgDoubleScaffolding;
+let imgCloud;
 let raindrops = [];
 let birds = [];
 let bats = [];
@@ -867,6 +870,9 @@ function preload() {
   imgBird = loadImage("assets/birdfly.png");
   imgBat = loadImage("assets/bat2.png");
   imgCar = loadImage("assets/car.png");
+  imgScaffolding = loadImage("assets/scaffolding.png");
+  imgDoubleScaffolding = loadImage("assets/double_scaffolding.png");
+  imgCloud = loadImage("assets/Cloud_Tileset.png");
 
   // Load sounds
   soundJump = loadSound("assets/jump.mp3");
@@ -1018,7 +1024,12 @@ function draw() {
     platformManager.update(2.0, lvl);
 
     // Draw platforms (NO spikes)
-    platformManager.draw(lvl.platformColor);
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
 
     // Draw player
     player.draw(false, imgRun);
@@ -1056,7 +1067,12 @@ function draw() {
     // Animate enter prompt opacity
     enterPromptAlpha = 127 + 127 * sin(millis() * 0.002);
 
-    platformManager.draw();
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
     player.draw(false, imgIdle);
 
     if (startScreen === "title") {
@@ -1173,7 +1189,12 @@ function draw() {
   //  LEVEL INTRO SCREEN
   // ══════════════════════════════════════════
   if (state === "levelintro") {
-    platformManager.draw();
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
     player.draw(false, imgIdle);
 
     fill(0, 0, 0, 200);
@@ -1238,7 +1259,12 @@ function draw() {
   //  LEVEL CLEAR SCREEN
   // ══════════════════════════════════════════
   if (state === "levelclear") {
-    platformManager.draw();
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
     player.draw(false, imgRun);
 
     fill(0, 0, 0, 170);
@@ -1403,7 +1429,12 @@ function draw() {
     spikeManager.draw(intensity, MAX_INTENSITY);*/
 
     //Spike stuff ^
-    platformManager.draw(lvl.platformColor);
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
     if (levelManager.currentIndex === 2) {
       spikeManager.draw(intensity, MAX_INTENSITY);
     }
@@ -1441,7 +1472,12 @@ function draw() {
   //  LOSE SCREEN
   // ══════════════════════════════════════════
   if (state === "lose") {
-    platformManager.draw(lvl.platformColor);
+    platformManager.draw(
+      lvl.platformColor,
+      imgScaffolding,
+      imgDoubleScaffolding,
+      imgCloud
+    );
     spikeManager.draw(intensity, MAX_INTENSITY);
     player.draw(false, imgRun);
     fill(0, 0, 0, 120);

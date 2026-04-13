@@ -520,18 +520,18 @@ class PlatformManager {
   preloadLevel2(screenWidth) {
     // ── Gapless cloud floor — two screen widths so it never runs out ──
     this.platforms.push(
-      new Platform(0, 255, screenWidth * 2, 14, "fade_respawn", "cloud_floor"),
-    );
+  new Platform(0, 255, 260, 14, "fade_respawn", "cloud_floor"),
+);
 
     // ── Pre-place clouds on 4 elevated tiers ─────────────────────────
     // Tiers from lowest to highest: 215, 185, 155, 120
-    const tierYs = [215, 185, 155, 120];
-    const tierGaps = [260, 300, 340, 390]; // spacing between clouds per tier
+    const tierYs = [215, 170, 125];
+    const tierGaps = [420, 500, 580]; // spacing between clouds per tier
 
     for (let t = 0; t < tierYs.length; t++) {
       let x = screenWidth * 0.15 + t * 55; // stagger each tier's start
       while (x < screenWidth * 1.8) {
-        const w = floor(random(150, 210));
+        const w = floor(random(120, 170));
         this.platforms.push(
           new Platform(x, tierYs[t], w, 14, "fade_respawn", "cloud"),
         );
@@ -541,7 +541,7 @@ class PlatformManager {
 
     // Prime timers so dynamic spawning starts immediately
     this._floorTimer = 80;
-    this._tierTimers = [100, 150, 200, 250];
+    this._tierTimers = [220, 320, 420];
   }
 
   // ── Main update ──────────────────────────────
@@ -636,12 +636,12 @@ class PlatformManager {
     }
 
     // 4 elevated tiers: low → high
-    const tierYs = [215, 185, 155, 120];
-    const tierGaps = [240, 280, 320, 370]; // independent interval per tier
-    for (let t = 0; t < 4; t++) {
+    const tierYs = [215, 170, 125];
+    const tierGaps = [420, 500, 580];
+    for (let t = 0; t < 3; t++) {
       this._tierTimers[t] -= speed;
       if (this._tierTimers[t] <= 0) {
-        const w = floor(random(150, 210));
+        const w = floor(random(120, 170));
         this.platforms.push(
           new Platform(width + 40, tierYs[t], w, 14, "fade_respawn", "cloud"),
         );
@@ -658,8 +658,7 @@ class PlatformManager {
     const w = 200;
 
     if (isLevelOne) {
-      // Always scaffolding on Level 1
-      const behavior = random() < 0.5 ? "fade_only" : "fade_respawn";
+    const behavior = "solid";
       if (this._overlaps(spawnX, w)) {
         this._resetSpawnTimer();
         return;
