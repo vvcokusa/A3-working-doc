@@ -848,9 +848,8 @@ let narrativeTimer = 0;
 let narrativeCharacterName = "Amaya";
 let narrativeLines = [
   "Amaya skates through a new city alone,",
-  "blending into the crowd like she's practiced a thousand times.",
-  "Running form something she can't quite name anymore...",
-  "But flowers have always been the one thing that make her mind stop.",
+  "Blending into the crowd like she's practiced a thousand times.",
+  "Running from something she can't quite name anymore...",
 ];
 let lineDelay = 300; // 5 seconds between line starts
 let fadeDuration = 150; // 2.5 seconds fade in, 2.5 seconds fade out
@@ -1095,7 +1094,7 @@ function draw() {
       fill(255, 220, 50);
       textSize(100);
       textStyle(BOLD);
-      text("Between Floor", width / 2, height / 2 - 50);
+      text("Between Floors", width / 2, height / 2 - 50);
 
       //Game subtitle
       fill(255, 180, 80);
@@ -1416,7 +1415,7 @@ function draw() {
       }
 
       // Spawn planes (Adjusted frequency for more planes)
-      if (frameCount % floor(random(120, 240)) === 0) {
+      if (frameCount % floor(random(120, 300)) === 0) {
         spawnPlane();
       }
 
@@ -1589,7 +1588,7 @@ function updateAndDrawBats() {
 function spawnBird() {
   birds.push({
     x: width + 50,
-    y: random(30, 160),
+    y: random(50, 225),
     speed: random(4, 6),
     frame: 0,
     frameTimer: 0,
@@ -1713,10 +1712,11 @@ function updateAndDrawCars() {
 function spawnPlane() {
   planes.push({
     x: width + 100,
-    y: random(-20, 80), // Flying high in the sky
+    y: random(-20, 80),
     speed: random(7, 10),
-    w: 160, // Scaled down from 320 for your 300px canvas
+    w: 160,
     h: 160,
+    scored: false,
   });
 }
 
@@ -1724,10 +1724,8 @@ function updateAndDrawPlanes() {
   for (let p of planes) {
     p.x -= p.speed;
 
-    // Draw the plane
     image(imgPlane, p.x, p.y, p.w, p.h);
 
-    // Collision Logic (padding the 160x160 box so it feels fair)
     const overlapX =
       player.x + player.w > p.x + 40 && player.x < p.x + p.w - 40;
     const overlapY =
@@ -1745,8 +1743,32 @@ function updateAndDrawPlanes() {
         hitCooldown = 60;
       }
     }
+    if (!p.scored && p.x + p.w < player.x) {
+      p.scored = true;
+      score++;
+      levelScore++;
+
+      if (shakeActive) {
+        shakeSuccess++;
+        if (shakeSuccess >= 5) {
+          shakeActive = false;
+          shakeSuccess = 0;
+          misses = 0;
+        }
+      }
+
+      if (!shakeActive && !boostActive) {
+        streak++;
+        if (streak >= 5) {
+          boostActive = true;
+          boostTimer = BOOST_DURATION;
+          streak = 0;
+          if (soundBoost) soundBoost.play();
+        }
+      }
+    }
   }
-  // Remove off-screen planes
+
   planes = planes.filter((p) => p.x + p.w > -100);
 }
 

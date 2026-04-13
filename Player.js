@@ -173,31 +173,37 @@ class Player {
 
     // ── Platform collisions ──────────────────
     for (const p of platforms) {
-      const inXRange = this.x + this.w > p.x + 4 && this.x < p.x + p.w - 4;
+  const inXRange = this.x + this.w > p.x + 4 && this.x < p.x + p.w - 4;
 
-      // Top-surface collision (landing on platform when falling)
-      if (!this.onGround && this.vy > 0 && inXRange) {
-        const feetY = this.y + this.h;
-        const crossingTop = prevFeetY <= p.y && feetY >= p.y;
+  // Top-surface collision (landing on platform when falling)
+  if (!this.onGround && this.vy > 0 && inXRange) {
+    let platformTop = p.y;
 
-        if (crossingTop) {
-          this.y = p.y - this.h; // snap feet to platform top
-          this.vy = 0;
-          this.onGround = true;
-          this.jumpCount = 0; // reset jumps when landing on platform
-
-          if (lvl && lvl.name === "Level 2 — Sky" && p.dissolveTimer == null) {
-            const baseDuration = 60;
-            const shrinkFactor = level2VisitCount >= 2 ? 0.8 : 1;
-            p.dissolveDuration = floor(baseDuration * shrinkFactor);
-            p.dissolveTimer = p.dissolveDuration;
-            p.alpha = 255;
-          }
-
-          break;
-        }
-      }
+    if (p.spriteMode === "double_scaffolding") {
+      platformTop = p.y - 28;
     }
+
+    const feetY = this.y + this.h;
+    const crossingTop = prevFeetY <= platformTop && feetY >= platformTop;
+
+    if (crossingTop) {
+      this.y = platformTop - this.h; // snap feet to platform top
+      this.vy = 0;
+      this.onGround = true;
+      this.jumpCount = 0; // reset jumps when landing on platform
+
+      if (lvl && lvl.name === "Level 2 — Sky" && p.dissolveTimer == null) {
+        const baseDuration = 60;
+        const shrinkFactor = level2VisitCount >= 2 ? 0.8 : 1;
+        p.dissolveDuration = floor(baseDuration * shrinkFactor);
+        p.dissolveTimer = p.dissolveDuration;
+        p.alpha = 255;
+      }
+
+      break;
+    }
+  }
+}
   }
 
   // ── Jump ─────────────────────────────────────
