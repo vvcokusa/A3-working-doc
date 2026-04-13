@@ -76,16 +76,16 @@ class HUD {
       if (fillW > 0) rect(meterX, meterY, fillW, meterH, 4);
     }
 
-    // ── Top Right Panel (Level Progress) ──────
+    /*// ── Top Right Panel (Level Progress) ──────
     fill(0, 0, 0, 60);
     rect(width - 175, 5, 170, 60, 8);
 
     textAlign(RIGHT);
     fill(255);
     textSize(12);
-    text("LEVEL " + currentLevel + " / " + totalLevels, width - 15, 22);
+    text("LEVEL " + currentLevel + " / " + totalLevels, width - 15, 22);*/
 
-    // Progress Bar
+    /*// Progress Bar
     const barW = 150;
     const barH = 8;
     const barX = width - barW - 15;
@@ -100,12 +100,12 @@ class HUD {
 
     fill(200);
     textSize(10);
-    text(levelScore + " / " + dodgeGoal + " SPIKES", width - 15, 52);
+    text(levelScore + " / " + dodgeGoal + "Objects", width - 15, 52);
 
     // ── Centered Boost Banner ────────────────
     if (boostActive) {
       this.drawBoostBanner();
-    }
+    }*/
 
     // Reset styles for rest of game
     textStyle(NORMAL);

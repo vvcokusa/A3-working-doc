@@ -107,7 +107,7 @@ class Platform {
   this.spriteMode === "double_scaffolding" &&
   imgDoubleScaffold
 ) {
-  image(imgDoubleScaffold, this.x, this.y - 4, this.w, 140);
+  image(imgDoubleScaffold, this.x, this.y - 50, this.w, 140);
 } else if (
   (this.spriteMode === "cloud" || this.spriteMode === "cloud_floor") &&
   imgCloud
