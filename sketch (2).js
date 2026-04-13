@@ -1,5 +1,5 @@
 // ── Canvas ───────────────────────────────────
-const CANVAS_W = screen.width;
+const CANVAS_W = 1280;
 const CANVAS_H = 300;
 
 // ── World heights ────────────────────────────
@@ -1107,7 +1107,6 @@ function checkCollision() {
     }
   }
 }
-
 
 function drawSpotlight() {
   if (levelManager.currentIndex !== 2) return;
