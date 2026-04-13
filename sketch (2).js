@@ -745,6 +745,10 @@ function draw() {
 
     pop();
 
+    drawSpotlight();
+
+    player.draw(boostActive, boostActive ? imgBoost : imgRun);
+
     hud.draw(
       score,
       intensity,
@@ -1102,6 +1106,38 @@ function checkCollision() {
       return;
     }
   }
+}
+
+
+function drawSpotlight() {
+  if (levelManager.currentIndex !== 2) return;
+  if (state !== "play") return;
+
+  const cx = player.x + 35;
+  const cy = player.y + 15;
+  const radius = 120;
+
+  const ctx = drawingContext;
+
+  push();
+  noStroke();
+
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.96)";
+  ctx.beginPath();
+
+  // whole screen
+  ctx.rect(0, 0, width, height);
+
+  // cut-out circle
+  ctx.moveTo(cx + radius, cy);
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2, true);
+
+  // fill only outside the circle
+  ctx.fill("evenodd");
+  ctx.restore();
+
+  pop();
 }
 
 // ── Collision: garbage on platforms ───────────
