@@ -1,6 +1,6 @@
 ## Project Title
 
-Assignment 2 MidTermGame
+Between Floors - GBDA 302 Assignment 3 Final Game
 
 ---
 
@@ -12,15 +12,28 @@ Group: 10A
 
 ## Description
 
-This project is similary to the Chrome dinosour game where users can use their keyboard to avoid obstcacles and earn points.
+This project is a 2D runner-style platformer game built using p5.js that explores themes of emotional instability through gameplay mechanics. The player controls a character that continuously moves through levels, jumping across platforms and avoiding obstacles such as spikes while trying to increase their score.
+
+The design of the game was inspired by our disability - Borderline Personality Disorder (BPD) and games like Celeste, particularly in how it uses mechanics and level design to reflect emotional experiences. The goal was to create a simple but meaningful interaction where gameplay elements, such as disappearing platforms and increasing difficulty, symbolize instability and personal struggle, while still remaining accessible and easy to learn for players.
 
 ---
 
 ## Interaction Instructions
 
 > Press the `ENTER` key to start the game
+> Press the `I` key to go to the instructions
 > Press the `SPACEBAR` to jump and avoid obstacles
-> Press `R` to reset the game
+> Press the `R` key to reset the game
+
+---
+
+## Iteration Notes
+
+- Adjusted the speed-to-screen-width ratio so the game remains responsive on larger screens.
+
+- Implemented themed obstacles and level transitions to make the gameplay more engaging and better support the narrative.
+
+- Improved hit-testing so obstacles register collisions more accurately
 
 ---
 
@@ -30,33 +43,54 @@ N/A
 
 ---
 
-## Iteration Notes
-
-Post-Playtest: Changes Implemented
-
-Based on feedback from playtesting, several improvements were made to clarify gameplay and improve the player experience.
-
--- Mapping the game speed to larger screen sizes
-The speed of the game was significantly reduced when the game was played in fullscreen or on larger displays. Playtesters felt this negatively impacted the pacing and difficulty of the game. The game speed was adjusted so that obstacle movement scales appropriately with screen size, maintaining consistent gameplay regardless of resolution.
-
--- Reduced the number of player lives.
-Playtesters felt the game was too forgiving with ten hearts. The number of lives was reduced from 10 to 5 to increase challenge and tension.
-
--- Improved onboarding with clearer instructions.
-Many players found the instructions difficult to read and initially hesitated when learning the controls. A title screen and instruction screen were introduced to explain the jump mechanic and game objective more clearly before gameplay begins.
-
-Post-Showcase: Planned Improvements
-
-Based on feedback and observations during the showcase, the following improvements are planned for the next iteration.
-
--- Add polished character storyline and reactions. Introduce animations for the player character’s reactions(e.g., when jumping or hitting obstacles) to make gameplay feel more responsive and engaging, and use obstacle elements to convey cohesive storyline.
-
--- Refine game progression and pacing.
-Improve the end-of-level transition and progression system by adding clearer level completion screens, pacing adjustments- including increasing game speed over time, and introducing a character-split mechanism- were the screen splits and a mirrored would and character appears to maintain challenge.
-
----
-
 ## References
 
-[1]
-Falk Leichsenring, Nikolas Heim, Frank Leweke, Carsten Spitzer, Christiane Steinert, and Otto F. Kernberg. 2023. Borderline Personality Disorder. JAMA 329, 8 (February 2023), 670. DOI:https://doi.org/10.1001/jama.2023.0589
+Audio Library PH. 2018. City Skyline - No Copyright Sound Effects - Audio Library. Video. March 28, 2018. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=d0r2WtsE3O8&t=262s
+
+Audio Wind. 2023. Winter Morning Ambience Sound Effect | Copyright Free Nature Sounds. Video. January 5, 2023. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=Lkjhuss8byo
+
+break more. 2026. || 𝕖𝕥𝕙𝕖𝕣𝕖𝕒𝕝 𝕓𝕣𝕖𝕒𝕜𝕔𝕠𝕣𝕖 ||. Video. January 11, 2026. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=mi7Ch1wUDHc
+
+Chasersgaming. 2016. 2D car sprite. Retrieved April 12, 2026 from https://opengameart.org/content/2d-car-sprite-9
+
+Craftpix.net. 2022. Free Scrolling City Backgrounds Pixel Art. Retrieved April 8, 2026 from https://craftpix.net/freebies/free-scrolling-city-backgrounds-pixel-art/?num=1&count=236&sq=city%20background&pos=8
+
+Craftpix.net. 2022. Free Sky with Clouds Background Pixel Art Set. Retrieved April 8, 2026 from https://craftpix.net/freebies/free-sky-with-clouds-background-pixel-art-set/
+
+Craftpix.net. 2021. Free Street Animal Pixel Art Asset Pack. Retrieved April 11, 2026 from https://craftpix.net/freebies/free-street-animal-pixel-art-asset-pack/?num=1&count=23&sq=bird&pos=11
+
+Craftpix.net. 2024. Free Crystal Cave Pixel Art Backgrounds. Retrieved April 8, 2026 from https://craftpix.net/freebies/free-crystal-cave-pixel-art-backgrounds/?num=1&count=212&sq=cave%20background&pos=8
+
+stress. 2025. [free for profit] dark scenecore + rave +skypebf type beat (p. stress). Video. April 19, 2023. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=Cs92v-CGbVU
+
+MoikMellah. 2012. Bat (32x32). Retrieved April 12, 2026 from https://opengameart.org/content/bat-32x32
+
+NoCopyrightSounds. 2019. Max Brhon - Humanity | Electronic | NCS - Copyright Free Music. Video. June 26, 2019. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=OJhqsUnKUWw
+
+Ohnoponogames. 2026. Retro Cloud Tileset. Retrieved April 12, 2026 from https://craftpix.net/freebies/free-crystal-cave-pixel-art-backgrounds/?num=1&count=212&sq=cave%20background&pos=8
+
+Tyrell Corporation. 2024. Night City 🌌 | Cyberpunk Ambient Playlist 🎧 | Cyberpunk 2077 Inspired Dreamscape 🏙️. Video. April 18, 2024. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=M26cP2sursA&t=608s
+
+Raikou-San Studio. 202. Bat Sound Effect - Bat Flying By SFX Copyright Free. Video. December 16, 2022. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=DSU_w3zO4Ok
+
+The Guild of Ambience. 2017. - Dark Tomb - | Cave Sounds | 45 Minutes 🦇. Video. October 24, 2017. Retrieved April 12, 2026 from https://www.youtube.com/watch?v=kxqJuc1HHbg
+
+Byteside. 2021. A Retelling of Anxiety Through the Thoughtful Platformer Celeste. Byteside. https://www.byteside.com/2021/08/a-retelling-of-anxiety-through-celeste-mental-health-platform-game/
+
+CBR. 2022. Puzzle Platformer Celeste Is the Best Game for Your Mental Health. CBR. https://www.cbr.com/celeste-mental-health-indie-game/
+
+Giant Bomb Forums. n.d. The Mountain Within: How Celeste Transforms Gameplay into Psychological Struggle. https://www.giantbomb.com/celeste/3030-58634/forums/the-mountain-within-how-celeste-transforms-gamepla-1937618/
+
+Mainstream404. 2018. Celeste and Mental Health Part 1: What Does Celeste Teach Us About Mental Health?. https://mainstream404.wordpress.com/2018/04/07/celeste-and-mental-health-part-1-what-does-celeste-teach-us-about-mental-health/
+
+T. Marley-Becker. 2020. Game Mechanics and Mental Health: How Games Like Celeste Can Convey Feeling with Very Few Words. Medium. https://intessting.medium.com/gaming-mechanic-and-mental-health-55fb4905fa0e
+
+Safe In Our World. 2023. How Celeste Made Me Take Better Care of My Mental Health. Safe In Our World. https://safeinourworld.org/stories/celeste-how-one-video-game-made-me-take-better-care-of-my-mental-health/
+
+Socialanigirl Rambles. 2018. Celeste and Exploring Mental Health Through Gameplay. https://socialanigirlrambles.wordpress.com/2018/04/14/celeste-and-exploring-mental-health-through-gameplay/
+
+TV Obsessive. 2019. Celeste: The Most Accurate and Thoughtful Depiction of Mental Illness in a Video Game. TV Obsessive. https://tvobsessive.com/2019/07/06/celeste-the-most-accurate-and-thoughtful-depiction-of-mental-illness-in-a-video-game/
+
+F. Xiang. 2025. Celeste: A Glance into Mental Health, Ludonarrative Harmony, and Community. Medium. https://medium.com/@felixxiang27/celeste-mental-health-ludonarrative-harmony-and-community-065d38318c87
+
+Mayo Clinic. 2024. Borderline Personality Disorder. Mayo Clinic. https://www.mayoclinic.org/diseases-conditions/borderline-personality-disorder/symptoms-causes/syc-20370237

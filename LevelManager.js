@@ -44,7 +44,8 @@ class LevelManager {
         spawnRateMax: 90,
         platformColor: [200, 200, 255],
         hasPlatforms: true,
-        message: "You cleared Sky! One final challenge awaits...",
+        message:
+          "You've cleared the cityscape, but one final challenge awaits...",
       },
 
       // ── Level 3 — Cave ──────────────────
@@ -67,7 +68,7 @@ class LevelManager {
         spawnRateMax: 80,
         platformColor: [150, 100, 200],
         hasPlatforms: true,
-        message: "You escaped the Cave. You win!",
+        message: "You've cleared the sky but now you must face the darkness...",
       },
     ];
 
