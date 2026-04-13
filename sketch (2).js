@@ -1165,25 +1165,29 @@ function draw() {
 
       fill(255);
       textSize(12);
-      text("Dodge spikes by jumping over them.", width / 2, 150);
-      text("Dodge 100 spikes to clear each level!", width / 2, 168);
+      text("Dodge obstacles by jumping over them.", width / 2, 150);
+      text("Dodge 20 obstacles to clear each level!", width / 2, 168);
 
       fill(255, 130, 130);
       text(
-        "Red hanging spikes are dangerous when you're on a platform!",
+        "Each Level has unique obstacles (Cars, Planes, Spikes) and more!",
         width / 2,
         186,
       );
 
       fill(255);
-      text("Clear 5 spikes in a row to activate a JUMP BOOST!", width / 2, 204);
       text(
-        "If you hit a spike you enter SHAKE MODE! Clear 5 spikes to recover.",
+        "Clear 5 obstacles in a row to activate a JUMP BOOST!",
+        width / 2,
+        204,
+      );
+      text(
+        "If you hit an obstacle you enter SHAKE MODE! Clear 5 obstacles to recover.",
         width / 2,
         222,
       );
       text(
-        "You have 5 hearts. Hit a spike and lose 1 heart. Reach 0 and it's game over.",
+        "You have 5 hearts. Hit an obstacle and lose 1 heart. Reach 0 and it's game over.",
         width / 2,
         240,
       );
