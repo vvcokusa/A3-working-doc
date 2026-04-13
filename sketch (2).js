@@ -798,10 +798,13 @@ let imgCar;
 let imgScaffolding;
 let imgDoubleScaffolding;
 let imgCloud;
+let imgGarbage;
+let imgPlane;
 let raindrops = [];
 let birds = [];
 let bats = [];
 let cars = [];
+let planes = [];
 
 // ── Game-state variables ─────────────────────
 let state = "start";
@@ -820,6 +823,7 @@ let levelScore = 0;
 let intensity = 0;
 let streak = 0;
 let level2VisitCount = 0;
+let carSpawnTimer = 0;
 
 let boostActive = false;
 let boostTimer = 0;
@@ -873,6 +877,8 @@ function preload() {
   imgScaffolding = loadImage("assets/scaffolding.png");
   imgDoubleScaffolding = loadImage("assets/double_scaffolding.png");
   imgCloud = loadImage("assets/Cloud_Tileset.png");
+  imgGarbage = loadImage("assets/pile_garbage_big.png");
+  imgPlane = loadImage("assets/plane-small.png");
 
   // Load sounds
   soundJump = loadSound("assets/jump.mp3");
@@ -920,10 +926,12 @@ function resetGame() {
   shakeSuccess = 0;
   levelOneSecondPlatformSpikeSpawned = false;
   level2VisitCount = 0;
+  carSpawnTimer = 0;
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
   birds = [];
+  planes = [];
 
   startScreen = "title";
 }
@@ -949,11 +957,13 @@ function startNextLevel() {
   shakeSuccess = 0;
   levelOneSecondPlatformSpikeSpawned = false;
   misses = 0;
+  carSpawnTimer = 0;
 
   layerOffsets = [0, 0, 0, 0, 0];
   raindrops = [];
   birds = [];
   bats = [];
+  planes = [];
 }
 
 // ── Main draw loop ────────────────────────────
@@ -1028,7 +1038,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
 
     // Draw player
@@ -1071,7 +1082,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
     player.draw(false, imgIdle);
 
@@ -1193,7 +1205,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
     player.draw(false, imgIdle);
 
@@ -1263,7 +1276,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
     player.draw(false, imgRun);
 
@@ -1371,9 +1385,18 @@ function draw() {
 
     // -- Car spawning (level 1 only) --
     if (levelManager.currentIndex === 0) {
-      if (frameCount % floor(random(120, 190)) === 0) {
-        spawnCar();
+      carSpawnTimer--;
+
+      if (carSpawnTimer <= 0) {
+        const lastCar = cars.length > 0 ? cars[cars.length - 1] : null;
+
+        // only spawn if the previous car is far enough ahead
+        if (!lastCar || lastCar.x < width - 180) {
+          spawnCar();
+          carSpawnTimer = floor(random(55, 85));
+        }
       }
+
       updateAndDrawCars();
     }
 
@@ -1383,6 +1406,22 @@ function draw() {
         spawnBird();
       }
       updateAndDrawBirds();
+    }
+
+    // ── Birds and Planes (level 2 only) ──────────────
+    if (levelManager.currentIndex === 1) {
+      // Spawn birds
+      if (frameCount % floor(random(180, 300)) === 0) {
+        spawnBird();
+      }
+
+      // Spawn planes (Adjusted frequency for more planes)
+      if (frameCount % floor(random(120, 240)) === 0) {
+        spawnPlane();
+      }
+
+      updateAndDrawBirds();
+      updateAndDrawPlanes(); // Calling the new update function
     }
 
     // Bats (level 3 only)
@@ -1397,6 +1436,7 @@ function draw() {
     checkNearMiss();
     checkScore();
     checkCollision();
+    checkGarbageCollision();
 
     if (levelManager.currentIndex === 1) {
       // Level 2 check
@@ -1433,7 +1473,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
     if (levelManager.currentIndex === 2) {
       spikeManager.draw(intensity, MAX_INTENSITY);
@@ -1476,7 +1517,8 @@ function draw() {
       lvl.platformColor,
       imgScaffolding,
       imgDoubleScaffolding,
-      imgCloud
+      imgCloud,
+      imgGarbage,
     );
     spikeManager.draw(intensity, MAX_INTENSITY);
     player.draw(false, imgRun);
@@ -1668,6 +1710,46 @@ function updateAndDrawCars() {
   cars = cars.filter((c) => c.x + c.w > 0);
 }
 
+function spawnPlane() {
+  planes.push({
+    x: width + 100,
+    y: random(-20, 80), // Flying high in the sky
+    speed: random(7, 10),
+    w: 160, // Scaled down from 320 for your 300px canvas
+    h: 160,
+  });
+}
+
+function updateAndDrawPlanes() {
+  for (let p of planes) {
+    p.x -= p.speed;
+
+    // Draw the plane
+    image(imgPlane, p.x, p.y, p.w, p.h);
+
+    // Collision Logic (padding the 160x160 box so it feels fair)
+    const overlapX =
+      player.x + player.w > p.x + 40 && player.x < p.x + p.w - 40;
+    const overlapY =
+      player.y + player.h > p.y + 40 && player.y < p.y + p.h - 40;
+
+    if (overlapX && overlapY && hitCooldown <= 0) {
+      if (shakeActive) {
+        hearts = max(0, hearts - 1);
+        hitCooldown = 60;
+        if (soundDamage) soundDamage.play();
+        if (hearts <= 0) state = "lose";
+      } else if (!boostActive) {
+        shakeActive = true;
+        shakeSuccess = 0;
+        hitCooldown = 60;
+      }
+    }
+  }
+  // Remove off-screen planes
+  planes = planes.filter((p) => p.x + p.w > -100);
+}
+
 // ── Advance to next level or trigger win ─────
 function advanceLevel() {
   const advanced = levelManager.advance();
@@ -1778,6 +1860,42 @@ function checkCollision() {
         shakeSuccess = 0;
         boostActive = false;
         boostTimer = 0;
+      }
+
+      streak = 0;
+      return;
+    }
+  }
+}
+
+function checkGarbageCollision() {
+  if (hitCooldown > 0) return;
+  if (levelManager.currentIndex !== 0) return; // Level 1 only
+
+  for (const p of platformManager.platforms) {
+    if (!p.hasGarbage) continue;
+
+    const gx = p.x + p.garbageOffsetX;
+    const gy = p.y - 32;
+    const gw = p.garbageW || 46;
+    const gh = p.garbageH || 46;
+
+    const overlapX = player.x + player.w > gx + 6 && player.x < gx + gw - 6;
+    const overlapY = player.y + player.h > gy + 6 && player.y < gy + gh - 6;
+
+    if (overlapX && overlapY) {
+      if (shakeActive) {
+        hearts = max(0, hearts - 1);
+        hitCooldown = 60;
+        if (soundDamage) soundDamage.play();
+
+        if (hearts <= 0) {
+          state = "lose";
+        }
+      } else if (!boostActive) {
+        shakeActive = true;
+        shakeSuccess = 0;
+        hitCooldown = 60;
       }
 
       streak = 0;
